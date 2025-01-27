@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -33,9 +34,9 @@ public String addingStudentDetails(@RequestBody Map<String, Object> StudentDetai
 	return id;
 }
 
-@PostMapping("Teacher_Details")
-public String addingTeacherDetails(@RequestBody Map<String, Object> TeacherDetails) {
-	transportServiceDetails.addingTeacher(TeacherDetails);
+@PostMapping("Personal_Details/{sid}")
+public String addingParentDetails(@RequestBody Map<String, Object> PersonalDetails,@PathVariable String sid) {
+	transportServiceDetails.addingParent(PersonalDetails,sid);
 	return null;
 }
 
