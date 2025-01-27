@@ -51,15 +51,18 @@ public class TransportServiceDetails {
 		return id;
 	}
 
-	public void addingTeacher(Map<String, Object> teacherDetails) {
+
+
+	public void addingParent(Map<String, Object> PersonalDetails, String sid) {
 		// TODO Auto-generated method stub
-		CollectionReference TeacherCollection = firestore.collection("Teacher_Details");
+        CollectionReference PersonalCollection = firestore.collection("Personal_Details");
 		
 		String id = UUID.randomUUID().toString();
-		teacherDetails.put("id", id);
+		PersonalDetails.put("id", id);
+		PersonalDetails.put("sid", sid);
 		
-		DocumentReference TeacherDocument = TeacherCollection.document(id);
-		ApiFuture<WriteResult> Inserting_data_in_Document = TeacherDocument.set(teacherDetails);
+		DocumentReference TeacherDocument = PersonalCollection.document(id);
+		ApiFuture<WriteResult> Inserting_data_in_Document = TeacherDocument.set(PersonalDetails);
 	}
 }
 
