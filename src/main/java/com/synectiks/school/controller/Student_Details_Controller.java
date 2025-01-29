@@ -111,6 +111,4 @@ public List<Map<String, Object>> getMethodName2() throws InterruptedException, E
 public List<Map<String, Object>> getAttendance(@PathVariable String sid) throws InterruptedException, ExecutionException {
     return attendanceDetails.getAttendance(sid);
 }
-
-
 }
