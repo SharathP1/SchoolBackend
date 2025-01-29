@@ -77,9 +77,27 @@ public List<Map<String, Object>> getMethodName() throws InterruptedException, Ex
     return studentdetails ;
 }
 
+@GetMapping("get_Student_Details_By_Class")
+public List<Map<String, Object>> getMethodNamebyClass(@RequestParam String Class) throws InterruptedException, ExecutionException {
+    List<Map<String, Object>> studentdetails = studentsDetails.getstudentdetailsbyClass(Class);
+    return studentdetails;
+}
+ 
+@GetMapping("get_Student_Details_By_Class_And_Section")
+public List<Map<String, Object>> getstudentdetailsbyClassandSection(@RequestParam String class1, @RequestParam String section) throws InterruptedException, ExecutionException {
+    List<Map<String, Object>> studentdetails = studentsDetails.getstudentdetailsbyclassandsection(class1, section);
+    return studentdetails;
+}
+
 @GetMapping("get_Personal_Details")
 public List<Map<String, Object>> getMethodName1() throws InterruptedException, ExecutionException {
 	List<Map<String, Object>> personaldetails= personalServiceDetails.getpersonaldetails();
+    return personaldetails ;
+}
+ 
+@GetMapping("get_Personal_Details/{sid}")
+public List<Map<String, Object>> getMethodNamebyid(@PathVariable String sid) throws InterruptedException, ExecutionException {
+	List<Map<String, Object>> personaldetails= personalServiceDetails.getpersonaldetailsById(sid);
     return personaldetails ;
 }
 
