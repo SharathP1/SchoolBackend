@@ -2,6 +2,10 @@ package com.synectiks.school.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.synectiks.school.service.AttendanceDetails;
+import com.synectiks.school.service.FeeDetails;
+import com.synectiks.school.service.PersonalDetails;
+import com.synectiks.school.service.StudentsDetails;
 import com.synectiks.school.service.TransportServiceDetails;
 
 import java.util.List;
@@ -21,7 +25,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class Student_Details_Controller {
 	@Autowired
 	private TransportServiceDetails transportServiceDetails;
-	
+	@Autowired
+	private PersonalDetails personalServiceDetails;
+	@Autowired
+	private StudentsDetails studentsDetails;
+	@Autowired
+	private FeeDetails feeDetails;
+	@Autowired
+	private AttendanceDetails attendanceDetails;
 	
 	
 	//POST Methods
@@ -34,41 +45,54 @@ public List<Map<String, Object>> postMethodName(@RequestBody List<Map<String, Ob
 
 @PostMapping("Student_Details")
 public String addingStudentDetails(@RequestBody Map<String, Object> StudentDetails) {
-	String id=transportServiceDetails.addingStudent(StudentDetails);
+	String id=studentsDetails.addingStudent(StudentDetails);
 	return id;
 }
 
 @PostMapping("Personal_Details/{sid}")
 public String addingParentDetails(@RequestBody Map<String, Object> PersonalDetails,@PathVariable String sid) {
-	transportServiceDetails.addingParent(PersonalDetails,sid);
+	personalServiceDetails.addingParent(PersonalDetails,sid);
 	return null;
 }
 
 @PostMapping("Fee_Details/{sid}")
 public String addingFeeDetails(@RequestBody Map<String, Object> FeeDetails,@PathVariable String sid) {
-	transportServiceDetails.addingFee(FeeDetails,sid);
-	return null;
+	feeDetails.addingFee(FeeDetails,sid);
+	return "Fee Details recorded successfully!";
 }
+
+@PostMapping("attendance/{sid}")
+public String markAttendance(@RequestBody Map<String, Object> attendanceDetail, @PathVariable String sid) {
+	attendanceDetails.markAttendance(attendanceDetail, sid);
+    return "Attendance recorded successfully!";
+}
+
 
 
      //Get Methods
 
 @GetMapping("get_Student_Details")
 public List<Map<String, Object>> getMethodName() throws InterruptedException, ExecutionException {
-	List<Map<String, Object>> studentdetails= transportServiceDetails.getstudentdetails();
+	List<Map<String, Object>> studentdetails= studentsDetails.getstudentdetails();
     return studentdetails ;
 }
 
 @GetMapping("get_Personal_Details")
 public List<Map<String, Object>> getMethodName1() throws InterruptedException, ExecutionException {
-	List<Map<String, Object>> personaldetails= transportServiceDetails.getpersonaldetails();
+	List<Map<String, Object>> personaldetails= personalServiceDetails.getpersonaldetails();
     return personaldetails ;
 }
 
 @GetMapping("get_Fee_Details")
 public List<Map<String, Object>> getMethodName2() throws InterruptedException, ExecutionException {
-	List<Map<String, Object>> Feedetails= transportServiceDetails.getfeedetails();
+	List<Map<String, Object>> Feedetails= feeDetails.getfeedetails();
     return Feedetails ;
 }
+
+@GetMapping("attendance/{sid}")
+public List<Map<String, Object>> getAttendance(@PathVariable String sid) throws InterruptedException, ExecutionException {
+    return attendanceDetails.getAttendance(sid);
+}
+
 
 }
