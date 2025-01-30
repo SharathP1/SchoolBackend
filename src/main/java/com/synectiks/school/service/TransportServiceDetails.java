@@ -3,7 +3,6 @@ package com.synectiks.school.service;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import org.springframework.stereotype.Service;
 
@@ -17,7 +16,7 @@ import com.google.firebase.cloud.FirestoreClient;
 @Service
 public class TransportServiceDetails {
 
-	private static final String COLLECTION_NAME = "Transport_details";
+//	private static final String COLLECTION_NAME = "Transport_details";
     private final Firestore firestore;
 // 
     public TransportServiceDetails() {
@@ -26,7 +25,7 @@ public class TransportServiceDetails {
     
 	public void addingTransportDetails(List<Map<String, Object>> bustransport)  {
 		// TODO Auto-generated method stub
-		CollectionReference TransportCollection = firestore.collection(COLLECTION_NAME);
+		CollectionReference TransportCollection = firestore.collection("Transport_details");
 		
 		for (Map<String, Object> Busdetails: bustransport) {
 			String id = UUID.randomUUID().toString();
@@ -37,32 +36,6 @@ public class TransportServiceDetails {
 			
 		}
 		
-	}
-
-	public String addingStudent(Map<String, Object> studentDetails) {
-		// TODO Auto-generated method stub
-		CollectionReference StudentCollection = firestore.collection("Student_Details");
-		
-		String id = UUID.randomUUID().toString();
-		studentDetails.put("id", id);
-		
-		DocumentReference StudentDocument = StudentCollection.document(id);
-		ApiFuture<WriteResult> Inserting_data_in_Document = StudentDocument.set(studentDetails);
-		return id;
-	}
-
-
-
-	public void addingParent(Map<String, Object> PersonalDetails, String sid) {
-		// TODO Auto-generated method stub
-        CollectionReference PersonalCollection = firestore.collection("Personal_Details");
-		
-		String id = UUID.randomUUID().toString();
-		PersonalDetails.put("id", id);
-		PersonalDetails.put("sid", sid);
-		
-		DocumentReference TeacherDocument = PersonalCollection.document(id);
-		ApiFuture<WriteResult> Inserting_data_in_Document = TeacherDocument.set(PersonalDetails);
 	}
 }
 
