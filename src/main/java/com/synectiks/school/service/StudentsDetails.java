@@ -13,6 +13,7 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
@@ -58,5 +59,40 @@ public class StudentsDetails {
 
   		return t;
   	}
+  	
+	public List<Map<String, Object>> getstudentdetailsbyClass(String class1) throws InterruptedException, ExecutionException {
+		// TODO Auto-generated method stub
+		CollectionReference studentDetailsTable = firestore.collection("Student_Details");
+ 
+	    // Query the collection to find documents where the 'id' field matches the given sid
+	    Query query = studentDetailsTable.whereEqualTo("Class", class1);
+	    ApiFuture<QuerySnapshot> querySnapshot = query.get();
+ 
+	    List<Map<String, Object>> t = new ArrayList<>();
+ 
+	    for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
+	        // Add the document data (as a map) to the list
+	        t.add(document.getData());
+	    }
+ 
+	    return t;
+	}
+ 
+	public List<Map<String, Object>> getstudentdetailsbyclassandsection(String class1, String section) throws InterruptedException, ExecutionException {
+	    CollectionReference studentDetailsTable = firestore.collection("Student_Details");
+ 
+	    // Query the collection to find documents where the 'Class' field matches the given class1 and 'Section' field matches the given section
+	    Query query = studentDetailsTable.whereEqualTo("Class", class1).whereEqualTo("Section", section);
+	    ApiFuture<QuerySnapshot> querySnapshot = query.get();
+ 
+	    List<Map<String, Object>> t = new ArrayList<>();
+ 
+	    for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
+	        // Add the document data (as a map) to the list
+	        t.add(document.getData());
+	    }
+ 
+	    return t;
+	}
 
 }
