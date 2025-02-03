@@ -67,6 +67,15 @@ public String markAttendance(@RequestBody Map<String, Object> attendanceDetail, 
     return "Attendance recorded successfully!";
 }
 
+@PostMapping("student_attendance_per_period")
+public String student_attendance_per_period(@RequestBody Map<String, Object> student_attendance_per_period) {
+    attendanceDetails.student_attendance_per_period(student_attendance_per_period);
+    return "Attendance recorded successfully!";
+}
+
+
+
+
 
 
      //Get Methods
@@ -93,6 +102,20 @@ public List<Map<String, Object>> getMethodName2() throws InterruptedException, E
 public List<Map<String, Object>> getAttendance(@PathVariable String sid) throws InterruptedException, ExecutionException {
     return attendanceDetails.getAttendance(sid);
 }
+
+
+@GetMapping("student_attendance_per_period/class_section_name_period")
+public List<Map<String, Object>> getAttendanceByClassSectionNamePeriod(
+        @RequestParam(required = false) String classNumber,
+        @RequestParam(required = false) String section,
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String period) throws InterruptedException, ExecutionException {
+    return attendanceDetails.getAttendanceByClassSectionNamePeriod(classNumber, section, name, period);
+}
+
+
+
+
 
 
 }
