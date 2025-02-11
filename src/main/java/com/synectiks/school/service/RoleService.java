@@ -1,11 +1,14 @@
 package com.synectiks.school.service;
 import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import com.google.api.core.ApiFuture;
@@ -13,15 +16,19 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.cloud.FirestoreClient;
+
 @Service
 public class RoleService {
-
-    private final Firestore firestore;
-
-    public RoleService() {
-        this.firestore = FirestoreClient.getFirestore();
-    }
+	
+	 private final Firestore firestore;
+	 
+	 @Autowired
+	    public RoleService() {
+	        this.firestore = FirestoreClient.getFirestore();
+	    }
+    
 
     public void createRole(String schoolId, String roleName, List<String> permissions) {
         Map<String, Object> roleData = new HashMap<>();

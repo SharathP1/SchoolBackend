@@ -7,11 +7,16 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 import com.synectiks.school.service.FirebaseAuthService;
 
 
 @RestController
+@RequestMapping("/api/auth")
 public class AuthController {
     
 	
@@ -21,6 +26,7 @@ public class AuthController {
 	    @PostMapping("/signup")
 	    public Map<String, String> signUp(@RequestBody Map<String, String> user) {
 	        try {
+	        	System.out.println(user);
 	            String schoolName = user.get("schoolName");
 	            String email = user.get("email");
 	            String location = user.get("location");
@@ -48,14 +54,13 @@ public class AuthController {
 	            return errorResponse;
 	        }
 	    }
-     
-
+	    
 	    
 	    @PostMapping("/create-parents")
 	    public Map<String, String> createParents( @RequestBody Map<String, Object> request) {
 	        try {
 	        	
-	            
+	            System.out.println("##############");
 	            String schoolId = (String) request.get("schoolId");
 	            if (schoolId == null || schoolId.isEmpty()) {
 	                return Map.of("error", "School ID is required");

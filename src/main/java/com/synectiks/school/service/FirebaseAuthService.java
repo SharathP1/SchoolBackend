@@ -50,7 +50,12 @@ public class FirebaseAuthService {
         schoolDetails.put("location", location);
         schoolDetails.put("uid", uid); // Link to Firebase Auth UID
 
-        firestore.collection("schools_Auth_details").document(schoolId).set(schoolDetails);
+//        firestore.collection("schools_Auth_details").document(schoolId).set(schoolDetails);
+        try {
+            firestore.collection("schools_Auth_details").document(schoolId).set(schoolDetails);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to write to Firestore: " + e.getMessage());
+        }
 
         // Return a map with schoolId and success message
         Map<String, String> response = new HashMap<>();

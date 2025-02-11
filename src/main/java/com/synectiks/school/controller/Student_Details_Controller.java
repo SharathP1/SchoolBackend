@@ -68,7 +68,6 @@ public String markAttendance(@RequestBody Map<String, Object> attendanceDetail, 
 }
 
 
-
      //Get Methods
 
 @GetMapping("get_Student_Details")
