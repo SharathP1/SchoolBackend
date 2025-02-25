@@ -17,6 +17,7 @@ import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
@@ -24,53 +25,138 @@ import com.google.firebase.cloud.FirestoreClient;
 
 @Service
 public class FeeDetails {
-	
-	private final Firestore firestore;
-	// 
-	    public FeeDetails() {
-	        this.firestore = FirestoreClient.getFirestore();
+
+    private final Firestore firestore;
+
+    public FeeDetails() {
+        this.firestore = FirestoreClient.getFirestore();
+    }
+
+    // Pushing Fee Details
+    public void addingFee(Map<String, Object> feeDetails, String sid) {
+        CollectionReference feeCollection = firestore.collection("Fee_Details");
+
+        String id = UUID.randomUUID().toString();
+        feeDetails.put("id", id);
+        feeDetails.put("sid", sid);
+//        feeDetails.put("Payment_On", FieldValue.serverTimestamp()); // Add timestamp
+
+        DocumentReference feeDocument = feeCollection.document(id);
+        ApiFuture<WriteResult> insertingDataInDocument = feeDocument.set(feeDetails);
+    }
+
+    // Retrieve all fee details
+    public List<Map<String, Object>> getFeeDetails(String sid) throws InterruptedException, ExecutionException {
+        CollectionReference feeDetailsTable = firestore.collection("Fee_Details");
+  System.out.println("#####");
+     // Query the collection to find documents where the 'sid' field matches the given sid
+	    Query query = feeDetailsTable.whereEqualTo("sid", sid);
+	    ApiFuture<QuerySnapshot> querySnapshot = query.get();
+
+	    List<Map<String, Object>> t = new ArrayList<>();
+
+	    for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
+	        // Add the document data (as a map) to the list
+	        t.add(document.getData());
 	    }
-	
-	//Pushing Fee Details
-		public void addingFee(Map<String, Object> FeeDetails, String sid) {
-			// TODO Auto-generated method stub
-	        CollectionReference FeeCollection = firestore.collection("Fee_Details");
-			
-			String id = UUID.randomUUID().toString();
-			FeeDetails.put("id", id);
-			FeeDetails.put("sid", sid);
-			FeeDetails.put("Payment_On", FieldValue.serverTimestamp()); // Add timestamp
-			
-			DocumentReference FeeDocument = FeeCollection.document(id);
-			ApiFuture<WriteResult> Inserting_data_in_Document = FeeDocument.set(FeeDetails);
-		}
-		
-		
-		public List<Map<String, Object>> getfeedetails() throws InterruptedException, ExecutionException {
-			// TODO Auto-generated method stub
-			CollectionReference feeDetailsTable = firestore.collection("Fee_Details");        
-			// Get all documents in the collection        
-			ApiFuture<QuerySnapshot> querySnapshot = feeDetailsTable.get();         
-			// Process the query snapshot to get document details 
-			List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
-			List<Map<String, Object>> t = new ArrayList<>();
-			
-			SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH); // Format: Day/Month/Year
-			
-			for (QueryDocumentSnapshot details : documents) {
-		        Map<String, Object> data = details.getData();
-		        Object timestampObj = data.get("Payment_On");
+	    System.out.println("$$$"+t);
+//        ApiFuture<QuerySnapshot> querySnapshot = feeDetailsTable.get();
+//        // Process the query snapshot to get document details
+//        List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
+//        List<Map<String, Object>> feeDetailsList = new ArrayList<>();
+//
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH); // Format: Day/Month/Year
+//
+//        for (QueryDocumentSnapshot details : documents) {
+//            Map<String, Object> data = details.getData();
+//            Object timestampObj = data.get("Payment_On");
+//
+//            if (timestampObj instanceof Timestamp) {
+//                Timestamp timestamp = (Timestamp) timestampObj;
+//                Date date = timestamp.toDate();
+//                data.put("Payment_On", dateFormat.format(date)); // Convert and format date
+//            }
+//
+//            feeDetailsList.add(data);
+//        }
 
-		        if (timestampObj instanceof Timestamp) {
-		            Timestamp timestamp = (Timestamp) timestampObj;
-		            Date date = timestamp.toDate();
-		            data.put("Payment_On", dateFormat.format(date)); // Convert and format date
-		        }
+        return t;
+    }
+    
+    public List<Map<String, Object>> getFeeDetails1(String clas) throws InterruptedException, ExecutionException {
+        CollectionReference feeDetailsTable = firestore.collection("Fee_Details");
+  System.out.println("#####");
+     // Query the collection to find documents where the 'sid' field matches the given sid
+	    Query query = feeDetailsTable.whereEqualTo("class", clas);
+	    ApiFuture<QuerySnapshot> querySnapshot = query.get();
 
-		        t.add(data);
-		    }
+	    List<Map<String, Object>> t = new ArrayList<>();
 
-			return t;
-		}
+	    for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
+	        // Add the document data (as a map) to the list
+	        t.add(document.getData());
+	    }
+	    System.out.println("$$$"+t);
+//        ApiFuture<QuerySnapshot> querySnapshot = feeDetailsTable.get();
+//        // Process the query snapshot to get document details
+//        List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
+//        List<Map<String, Object>> feeDetailsList = new ArrayList<>();
+//
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH); // Format: Day/Month/Year
+//
+//        for (QueryDocumentSnapshot details : documents) {
+//            Map<String, Object> data = details.getData();
+//            Object timestampObj = data.get("Payment_On");
+//
+//            if (timestampObj instanceof Timestamp) {
+//                Timestamp timestamp = (Timestamp) timestampObj;
+//                Date date = timestamp.toDate();
+//                data.put("Payment_On", dateFormat.format(date)); // Convert and format date
+//            }
+//
+//            feeDetailsList.add(data);
+//        }
 
+        return t;
+    }
+
+    // Retrieve fee details based on parameters
+//    public List<Map<String, Object>> getFeeDetails(Long aid) throws InterruptedException, ExecutionException {
+//        CollectionReference feeDetailsTable = firestore.collection("Fee_Details");
+//        Query query = feeDetailsTable;
+//
+//        if (classname != null) {
+//            query = query.whereEqualTo("classname", classname);
+//        }
+//        if (section != null) {
+//            query = query.whereEqualTo("section", section);
+//        }
+//        if (aid != null) {
+//            query = query.whereEqualTo("aid", aid);
+//        }
+//        if (name != null) {
+//            query = query.whereEqualTo("name", name);
+//        }
+//
+//        ApiFuture<QuerySnapshot> querySnapshot = query.get();
+//        List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
+//        List<Map<String, Object>> feeDetailsList = new ArrayList<>();
+//
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH); // Format: Day/Month/Year
+//
+//        for (QueryDocumentSnapshot details : documents) {
+//            Map<String, Object> data = details.getData();
+//            Object timestampObj = data.get("Payment_On");
+//
+//            if (timestampObj instanceof Timestamp) {
+//                Timestamp timestamp = (Timestamp) timestampObj;
+//                Date date = timestamp.toDate();
+//                data.put("Payment_On", dateFormat.format(date)); // Convert and format date
+//            }
+//
+//            feeDetailsList.add(data);
+//        }
+//
+//        return feeDetailsList;
+//    }
 }
