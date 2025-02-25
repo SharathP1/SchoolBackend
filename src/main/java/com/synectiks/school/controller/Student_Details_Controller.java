@@ -91,6 +91,7 @@ public List<Map<String, Object>> getMethodName() throws InterruptedException, Ex
     return studentdetails ;
 }
 
+<<<<<<< HEAD
 @GetMapping("get_Student_Details/{id}")
 public Map<String, Object> getStudentById(@PathVariable String id) throws ExecutionException, InterruptedException {
     return studentsDetails.getStudentById(id);
@@ -110,6 +111,8 @@ public Map<String, Object> getTransportDetailsByStudentId(@PathVariable String i
     }
 }
 
+=======
+>>>>>>> origin/rishi
 @GetMapping("get_Student_Details_By_Class")
 public List<Map<String, Object>> getMethodNamebyClass(@RequestParam String Class) throws InterruptedException, ExecutionException {
     List<Map<String, Object>> studentdetails = studentsDetails.getstudentdetailsbyClass(Class);
