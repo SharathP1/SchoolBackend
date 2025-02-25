@@ -95,7 +95,7 @@ public class StudentsDetails {
  
 	    return t;
 	}
-<<<<<<< HEAD
+
 	
 	    public Map<String, Object> getStudentById(String id) throws ExecutionException, InterruptedException {
 	        DocumentReference studentDocument = firestore.collection("Student_Details").document(id);
@@ -119,7 +119,6 @@ public class StudentsDetails {
 	            return null;
 	        }
 	    }
-=======
->>>>>>> origin/rishi
+
 
 }
