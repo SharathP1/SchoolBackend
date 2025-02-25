@@ -66,6 +66,34 @@ private final Firestore firestore;
 
 	    return attendanceRecords;
 	}
+    
+    public List<Map<String, Object>> getAttendance1(String clas) throws InterruptedException, ExecutionException {
+        CollectionReference attendanceCollection = firestore.collection("Attendance");
+        Query query = attendanceCollection.whereEqualTo("class", clas);
+
+        ApiFuture<QuerySnapshot> querySnapshot = query.get();
+        List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
+        List<Map<String, Object>> attendanceRecords = new ArrayList<>();
+
+        for (QueryDocumentSnapshot document : documents) {
+            Map<String, Object> data = document.getData();
+
+            // Check if timestamp is not null before converting
+            if (data.containsKey("timestamp") && data.get("timestamp") != null) {
+                Timestamp timestamp = (Timestamp) data.get("timestamp");
+                Date date = timestamp.toDate();
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                data.put("formatted_date", sdf.format(date));
+            } else {
+                data.put("formatted_date", "N/A"); // Handle the case where timestamp is null
+            }
+
+            attendanceRecords.add(data);
+        }
+
+        return attendanceRecords;
+    }
+
 
     public void student_attendance_per_period(Map<String, Object> student_attendance_per_period) {
         CollectionReference studentattendanceperperiodCollection = firestore.collection("Student Attendance Per Period");
