@@ -444,10 +444,23 @@ public class TeacherDetails {
 
 
 
-    // Updating a Lesson Plan
-    public void updateLessonPlan(String employeeId, Map<String, Object> lessonPlan) throws InterruptedException, ExecutionException {
-        DocumentReference lessonPlanDocument = firestore.collection("LessonPlans").document(employeeId);
-        ApiFuture<WriteResult> updatingDataInDocument = lessonPlanDocument.set(lessonPlan);
+    public void updateLessonPlan(String id, Map<String, Object> lessonPlan) throws InterruptedException, ExecutionException {
+        // Query the collection to find the document with the matching 'id' field
+        ApiFuture<QuerySnapshot> querySnapshot = firestore.collection("LessonPlans").whereEqualTo("id", id).get();
+        QuerySnapshot queryResult = querySnapshot.get();
+
+        if (!queryResult.isEmpty()) {
+            // Get the first document that matches the query
+            DocumentSnapshot documentSnapshot = queryResult.getDocuments().get(0);
+            DocumentReference lessonPlanDocument = documentSnapshot.getReference();
+
+            // Update the document with the new data
+            ApiFuture<WriteResult> updatingDataInDocument = lessonPlanDocument.set(lessonPlan);
+            // Optionally, you can wait for the update to complete and handle the result
+            System.out.println("Update time: " + updatingDataInDocument.get().getUpdateTime());
+        } else {
+            System.out.println("No document found with the given id.");
+        }
     }
     
     
