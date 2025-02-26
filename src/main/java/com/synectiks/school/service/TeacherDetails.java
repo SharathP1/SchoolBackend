@@ -444,6 +444,7 @@ public class TeacherDetails {
 
 
 
+
     public void updateLessonPlan(String id, Map<String, Object> lessonPlan) throws InterruptedException, ExecutionException {
         // Query the collection to find the document with the matching 'id' field
         ApiFuture<QuerySnapshot> querySnapshot = firestore.collection("LessonPlans").whereEqualTo("id", id).get();
@@ -461,6 +462,7 @@ public class TeacherDetails {
         } else {
             System.out.println("No document found with the given id.");
         }
+
     }
     
     

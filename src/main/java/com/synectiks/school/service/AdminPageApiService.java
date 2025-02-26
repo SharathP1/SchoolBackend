@@ -1,4 +1,4 @@
-package com.synectiks.school.service;
+<<<<<<package com.synectiks.school.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
