@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,32 +30,32 @@ public class AdminPageApisController {
 			return null;
 			
 		}
-		@GetMapping("/getFeeDetailsForCurrentMonth")
-	 public List<Map<String, Object>> getfeedetails()
+		@GetMapping("/getFeeDetailsForCurrentMonth/{schoolId}")
+	 public List<Map<String, Object>> getfeedetails(@PathVariable String schoolId)
 	 {
-		return  adminpageapiservice.getFeeDetailsForCurrentMonth() ;
+		return  adminpageapiservice.getFeeDetailsForCurrentMonth(schoolId) ;
 			
 	 }
-		@GetMapping("/getFeeDetailsForCurrentWeek")
-	public List<Map<String, Object>> getfeedetailsofcurrentweek()
+		@GetMapping("/getFeeDetailsForCurrentWeek/{schoolId}")
+	public List<Map<String, Object>> getfeedetailsofcurrentweek(@PathVariable String schoolId)
 	{
-		return  adminpageapiservice.getFeeDetailsForCurrentWeek() ;
+		return  adminpageapiservice.getFeeDetailsForCurrentWeek(schoolId) ;
 			
 	}
-		@GetMapping("/totalpaymentsreceived")
-	public double totalpaymentsreceived()
+		@GetMapping("/totalpaymentsreceived/{schoolId}")
+	public double totalpaymentsreceived(@PathVariable String schoolId)
 	{
-		return  adminpageapiservice.getTotalPaymentsReceived() ;
+		return  adminpageapiservice.getTotalPaymentsReceived(schoolId) ;
 			
 	}
-	@GetMapping("/TotalPaymentsReceivedToday")
-public double totalPaymentsReceivedToday()
+	@GetMapping("/TotalPaymentsReceivedToday/{schoolId}")
+public double totalPaymentsReceivedToday(@PathVariable String schoolId)
 {
-	return  adminpageapiservice.getTotalPaymentsReceivedToday() ;
+	return  adminpageapiservice.getTotalPaymentsReceivedToday(schoolId) ;
 }	
-@GetMapping("/AllPaymentsWithPaidDate")
-public List<Map<String, Object>> allPaymentsWithPaidDate()
+@GetMapping("/AllPaymentsWithPaidDate/{schoolId}")
+public List<Map<String, Object>> allPaymentsWithPaidDate(@PathVariable String schoolId)
 {
-return  adminpageapiservice.getAllPaymentsWithPaidDate() ;
+return  adminpageapiservice.getAllPaymentsWithPaidDate(schoolId) ;
 }
 }
