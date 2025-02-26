@@ -26,53 +26,7 @@ public class AttendanceService {
         this.firestore = FirestoreClient.getFirestore();
     }
 
-//    public String storeAttendanceDetails(List<Map<String, Object>> attendance) {
-//        try {
-//            // Extract student ID from the attendance map
-//            String studentId = (String) attendance.get("sid");
-//            String studentName = (String) attendance.get("sname");
-//           
-//            String clas = (String) attendance.get("class");
-//            List<Map<String, Object>> newAttendanceRecords = (List<Map<String, Object>>) attendance.get("attendance");
-//
-//            // Get the student document reference
-//            DocumentReference studentRef = firestore.collection("Attendance").document(studentId);
-//
-//            // Get the current document
-//            ApiFuture<DocumentSnapshot> future = studentRef.get();
-//            DocumentSnapshot document = future.get();
-//
-//            if (document.exists()) {
-//                // Get the current attendance array
-//                Map<String, Object> currentData = document.getData();
-//                List<Map<String, Object>> currentAttendanceList = (List<Map<String, Object>>) currentData.get("attendance");
-//
-//                // Append the new attendance records
-//                if (currentAttendanceList == null) {
-//                    currentAttendanceList = new ArrayList<>();
-//                }
-//                currentAttendanceList.addAll(newAttendanceRecords);
-//
-//                // Update the document with the new attendance array
-//                currentData.put("attendance", currentAttendanceList);
-//                ApiFuture<WriteResult> writeResult = studentRef.set(currentData);
-//                return "Attendance updated successfully for student ID: " + studentId;
-//            } else {
-//                // Create a new student document with the attendance record
-//                Map<String, Object> newStudentData = new HashMap<>();
-//                newStudentData.put("sid", studentId);
-//                newStudentData.put("sname", studentName);
-//                newStudentData.put("class", clas);
-//                newStudentData.put("attendance", newAttendanceRecords);
-//                ApiFuture<WriteResult> writeResult = studentRef.set(newStudentData);
-//                return "Attendance saved successfully for student ID: " + studentId;
-//            }
-//        } catch (InterruptedException | ExecutionException e) {
-//            e.printStackTrace();
-//            return "Error saving attendance: " + e.getMessage();
-//        }
-//    }
-    
+
     public String storeAttendanceDetails(List<Map<String, Object>> attendanceList) {
         for (Map<String, Object> attendance : attendanceList) {
             try {
