@@ -260,11 +260,14 @@ public class Teacher_Details_Controller {
     //Update Apis
     
  // Endpoint to update a lesson plan
-    @PutMapping("/updateLessonPlan/{employeeId}")
-    public String updateLessonPlan(@PathVariable String employeeId, @RequestBody Map<String, Object> lessonPlan) throws InterruptedException, ExecutionException {
-        teacherDetailsService.updateLessonPlan(employeeId, lessonPlan);
+    @PutMapping("/updateLessonPlan/{id}")
+    public String updateLessonPlan(@PathVariable String id, @RequestBody Map<String, Object> lessonPlan) throws InterruptedException, ExecutionException {
+        // Update the lesson plan with the modified map
+        teacherDetailsService.updateLessonPlan(id, lessonPlan);
+
         return "Lesson plan updated successfully!";
     }
+
     
 //    Delete Apis
     @DeleteMapping("/deleteLessonPlan/{lessonPlanId}")
