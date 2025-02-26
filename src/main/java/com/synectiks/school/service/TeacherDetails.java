@@ -407,14 +407,24 @@ public class TeacherDetails {
             Timestamp createdAtTimestamp = (Timestamp) lessonPlan.get("createdAt");
             Timestamp updatedAtTimestamp = (Timestamp) lessonPlan.get("updatedAt");
 
-            lessonPlan.put("createdAt", istDateFormat.format(new Date(createdAtTimestamp.getSeconds() * 1000)));
-            lessonPlan.put("updatedAt", istDateFormat.format(new Date(updatedAtTimestamp.getSeconds() * 1000)));
+            if (createdAtTimestamp != null) {
+                lessonPlan.put("createdAt", istDateFormat.format(new Date(createdAtTimestamp.getSeconds() * 1000)));
+            } else {
+                lessonPlan.put("createdAt", "N/A"); // Handle null case
+            }
+
+            if (updatedAtTimestamp != null) {
+                lessonPlan.put("updatedAt", istDateFormat.format(new Date(updatedAtTimestamp.getSeconds() * 1000)));
+            } else {
+                lessonPlan.put("updatedAt", "N/A"); // Handle null case
+            }
 
             lessonPlans.add(lessonPlan);
         }
 
         return lessonPlans;
     }
+
     
     public void deleteLessonPlan(String lessonPlanId) throws InterruptedException, ExecutionException {
         DocumentReference lessonPlanDocument = firestore.collection("LessonPlans").document(lessonPlanId);
@@ -455,15 +465,39 @@ public class TeacherDetails {
             DocumentSnapshot documentSnapshot = queryResult.getDocuments().get(0);
             DocumentReference lessonPlanDocument = documentSnapshot.getReference();
 
+            // Retrieve fields from the document
+            String className = documentSnapshot.getString("className");
+            Timestamp createdAt = documentSnapshot.getTimestamp("createdAt");
+            String documentLink = documentSnapshot.getString("documentLink");
+            String lessonPlanType = documentSnapshot.getString("lessonPlanType");
+            String subject = documentSnapshot.getString("subject");
+            String teacherId = documentSnapshot.getString("teacherId");
+            String topicName = documentSnapshot.getString("topicName");
+            Timestamp updatedAt = documentSnapshot.getTimestamp("updatedAt");
+
+            // Add the id field to the lessonPlan map
+            lessonPlan.put("id", id);
+
             // Update the document with the new data
             ApiFuture<WriteResult> updatingDataInDocument = lessonPlanDocument.set(lessonPlan);
-            // Optionally, you can wait for the update to complete and handle the result
-            System.out.println("Update time: " + updatingDataInDocument.get().getUpdateTime());
+            
+            // Wait for the update to complete and retrieve the update time
+            WriteResult writeResult = updatingDataInDocument.get();
+            Timestamp updateTime = writeResult.getUpdateTime();
+
+            // Add the update time to the lessonPlan map
+            lessonPlan.put("UpdatedAt", updateTime);
+
+            // Save the updated document with the new 'time' field
+            lessonPlanDocument.update("UpdatedAt", updateTime);
+
+            // Print the update time
+            System.out.println("Update time: " + updateTime);
         } else {
             System.out.println("No document found with the given id.");
         }
-
     }
+
     
     
 }
