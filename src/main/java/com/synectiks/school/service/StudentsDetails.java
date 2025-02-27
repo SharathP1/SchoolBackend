@@ -2,11 +2,12 @@ package com.synectiks.school.service;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-
+import java.util.HashMap;
 import org.springframework.stereotype.Service;
 
 import com.google.api.core.ApiFuture;
@@ -20,6 +21,8 @@ import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.cloud.FirestoreClient;
 
+import com.synectiks.school.entity.StudentDetails;
+
 @Service
 public class StudentsDetails {
 	
@@ -30,53 +33,93 @@ public class StudentsDetails {
     }
     
   //Pushing Student Details
-  	public String addingStudent(Map<String, Object> studentDetails) {
-  		// TODO Auto-generated method stub
-  		CollectionReference StudentCollection = firestore.collection("Student_Details");
-  		
-  		String id = UUID.randomUUID().toString();
-  		studentDetails.put("id", id);
-  		
-  		DocumentReference StudentDocument = StudentCollection.document(id);
-  		ApiFuture<WriteResult> Inserting_data_in_Document = StudentDocument.set(studentDetails);
-  		return id;
-  	}
-  	
+    public String addingStudent(StudentDetails studentDetails, String schoolId) {
+        CollectionReference studentCollection = firestore.collection("Student_Details");
+
+        // Generate a unique ID for the student document
+        String id = UUID.randomUUID().toString();
+        studentDetails.setId(id);
+        studentDetails.setSchoolId(schoolId);
+
+        // Convert StudentDetails to a Map for Firestore
+        Map<String, Object> studentData = studentDetailsToMap(studentDetails);
+
+        DocumentReference studentDocument = studentCollection.document(id);
+        ApiFuture<WriteResult> resultFuture = studentDocument.set(studentData);
+
+        try {
+            // Optionally, wait for the write operation to complete
+            resultFuture.get();
+           
+        } catch (InterruptedException | ExecutionException e) {
+           
+            return null;
+        }
+
+        return id;
+    }
+
+    private Map<String, Object> studentDetailsToMap(StudentDetails studentDetails) {
+        // Convert StudentDetails object to a Map for Firestore
+        return new HashMap<String, Object>() {{
+            put("aadhaarNumber", studentDetails.getAadhaarNumber());
+            put("address", studentDetails.getAddress());
+            put("admissionName", studentDetails.getAdmissionName());
+            put("age", studentDetails.getAge());
+            put("studentClass", studentDetails.getStudentClass());
+            put("dob", studentDetails.getDob());
+            put("email", studentDetails.getEmail());
+            put("fatherName", studentDetails.getFatherName());
+            put("fatherOccupation", studentDetails.getFatherOccupation());
+            put("gender", studentDetails.getGender());
+            put("motherName", studentDetails.getMotherName());
+            put("motherOccupation", studentDetails.getMotherOccupation());
+            put("phoneNumber", studentDetails.getPhoneNumber());
+            put("rollNumber", studentDetails.getRollNumber());
+            put("routeName", studentDetails.getRouteName());
+          
+            put("studentName", studentDetails.getStudentName());
+            put("id", studentDetails.getId());
+            put("schoolId", studentDetails.getSchoolId());
+        }};
+    }
   //Getting Complete Students Details
-  	public List<Map<String, Object>> getstudentdetails() throws InterruptedException, ExecutionException {
-  		// TODO Auto-generated method stub
-  		
-  		CollectionReference studentDetailsTable = firestore.collection("Student_Details");        
-  		// Get all documents in the collection        
-  		ApiFuture<QuerySnapshot> querySnapshot = studentDetailsTable.get();         
-  		// Process the query snapshot to get document details 
-  		List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
-  		List<Map<String, Object>> t = new ArrayList<>();
-
-  		for (QueryDocumentSnapshot details : documents) {
-  		    // Add the document data (as a map) to the list
-  		    t.add(details.getData());
-  		}
-
-  		return t;
-  	}
+  	public List<StudentDetails> getstudentdetails(String schoolId) throws InterruptedException, ExecutionException {
   	
-	public List<Map<String, Object>> getstudentdetailsbyClass(String class1) throws InterruptedException, ExecutionException {
-		// TODO Auto-generated method stub
-		CollectionReference studentDetailsTable = firestore.collection("Student_Details");
- 
-	    // Query the collection to find documents where the 'id' field matches the given sid
-	    Query query = studentDetailsTable.whereEqualTo("Class", class1);
-	    ApiFuture<QuerySnapshot> querySnapshot = query.get();
- 
-	    List<Map<String, Object>> t = new ArrayList<>();
- 
-	    for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
-	        // Add the document data (as a map) to the list
-	        t.add(document.getData());
-	    }
- 
-	    return t;
+        
+        CollectionReference studentDetailsTable = firestore.collection("Student_Details");
+
+        ApiFuture<QuerySnapshot> querySnapshot = studentDetailsTable.whereEqualTo("schoolId", schoolId).get();
+        List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
+        
+        List<StudentDetails> studentDetailsList = new ArrayList<>();
+
+        for (QueryDocumentSnapshot details : documents) {
+            // Convert Firestore document to StudentDetails object
+            StudentDetails student = details.toObject(StudentDetails.class);
+            studentDetailsList.add(student);
+        }
+
+        return studentDetailsList;
+    }
+    
+  	
+  	
+	public List<StudentDetails> getstudentdetailsbyClass(String class1,String schoolId) throws InterruptedException, ExecutionException {
+		 CollectionReference studentDetailsTable = firestore.collection("Student_Details");
+
+		    Query query = studentDetailsTable
+		            .whereEqualTo("studentClass", class1)
+		            .whereEqualTo("schoolId", schoolId);
+
+		    ApiFuture<QuerySnapshot> querySnapshot = query.get();
+		    List<StudentDetails> studentList = new ArrayList<>();
+
+		    for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
+		        studentList.add(document.toObject(StudentDetails.class)); // Convert directly
+		    }
+
+		    return studentList;
 	}
  
 	public List<Map<String, Object>> getstudentdetailsbyclassandsection(String class1, String section) throws InterruptedException, ExecutionException {
@@ -97,14 +140,22 @@ public class StudentsDetails {
 	}
 
 	
-	    public Map<String, Object> getStudentById(String id) throws ExecutionException, InterruptedException {
-	        DocumentReference studentDocument = firestore.collection("Student_Details").document(id);
-	        ApiFuture<DocumentSnapshot> future = studentDocument.get();
-	        DocumentSnapshot document = future.get();
-	        if (document.exists()) {
-	            return document.getData();
+	  public Map<String, Object> getStudentById(String schoolId,String rollNumber) throws ExecutionException, InterruptedException {
+	    	CollectionReference studentCollection = firestore.collection("Student_Details");
+
+	        // Query by schoolId and rollNumber
+	        ApiFuture<QuerySnapshot> future = studentCollection
+	                .whereEqualTo("schoolId", schoolId)
+	                .whereEqualTo("rollNumber", rollNumber)
+	                .limit(1) // Fetch only one result
+	                .get();
+
+	        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+	        
+	        if (!documents.isEmpty()) {
+	            return documents.get(0).getData();
 	        } else {
-	            return null;
+	            return Collections.emptyMap();
 	        }
 	    }
 	    

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.synectiks.school.entity.StudentFeeDetails;
 import com.synectiks.school.service.AdminPageApiService;
 
 
@@ -22,11 +23,11 @@ public class AdminPageApisController {
 	@Autowired
 	private AdminPageApiService adminpageapiservice;
 	
-		@PostMapping("/add_fee_detais")
-		public String feeDetails(@RequestBody Map<String , Object> transactiondetails) throws InterruptedException, ExecutionException
+		@PostMapping("/add_fee_detais/{schoolId}")
+		public String feeDetails(@RequestBody StudentFeeDetails transactiondetails,@PathVariable String schoolId) throws InterruptedException, ExecutionException
 		{
 			
-			adminpageapiservice.addFeeDetails(transactiondetails);
+			adminpageapiservice.addFeeDetails(transactiondetails,schoolId);
 			return null;
 			
 		}

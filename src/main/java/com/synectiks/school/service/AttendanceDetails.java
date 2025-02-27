@@ -35,7 +35,7 @@ private final Firestore firestore;
 	    CollectionReference attendanceCollection = firestore.collection("Attendance");
 
 	    String id = UUID.randomUUID().toString();
-	    attendanceDetail.put("id", id);
+//	    attendanceDetail.put("id", id);
 	    attendanceDetail.put("sid", sid);
 	    attendanceDetail.put("timestamp", FieldValue.serverTimestamp()); // Add Timestamp
 
@@ -44,33 +44,44 @@ private final Firestore firestore;
 	}
 
     
-    public List<Map<String, Object>> getAttendance(String sid) throws InterruptedException, ExecutionException {
-	    CollectionReference attendanceCollection = firestore.collection("Attendance");
-	    Query query = attendanceCollection.whereEqualTo("sid", sid);
-	    
-	    ApiFuture<QuerySnapshot> querySnapshot = query.get();
-	    List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
-	    List<Map<String, Object>> attendanceRecords = new ArrayList<>();
-
-	    for (QueryDocumentSnapshot document : documents) {
-	        Map<String, Object> data = document.getData();
-	        
-	        // Convert timestamp to readable format
-	        Timestamp timestamp = (Timestamp) data.get("timestamp");
-	        Date date = timestamp.toDate();
-	        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-	        data.put("formatted_date", sdf.format(date));
-
-	        attendanceRecords.add(data);
-	    }
-
-	    return attendanceRecords;
-	}
-    
-    public List<Map<String, Object>> getAttendance1(String clas) throws InterruptedException, ExecutionException {
+    public List<Map<String, Object>> getAttendance(String schoolId, String sid) throws InterruptedException, ExecutionException {
         CollectionReference attendanceCollection = firestore.collection("Attendance");
-        Query query = attendanceCollection.whereEqualTo("class", clas);
 
+   
+        Query query = attendanceCollection
+            .whereEqualTo("schoolId", schoolId)
+            .whereEqualTo("sid", sid);
+
+        ApiFuture<QuerySnapshot> querySnapshot = query.get();
+        List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
+        List<Map<String, Object>> attendanceRecords = new ArrayList<>();
+
+        for (QueryDocumentSnapshot document : documents) {
+            Map<String, Object> data = document.getData();
+
+          
+            Timestamp timestamp = (Timestamp) data.get("timestamp");
+            if (timestamp != null) {
+                Date date = timestamp.toDate();
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                data.put("formatted_date", sdf.format(date));
+            } else {
+                data.put("formatted_date", "N/A"); 
+            }
+
+            attendanceRecords.add(data);
+        }
+
+        return attendanceRecords;
+    }
+
+    
+    public List<Map<String, Object>> getAttendance1(String schoolId,String clas) throws InterruptedException, ExecutionException {
+        CollectionReference attendanceCollection = firestore.collection("Attendance");
+//        Query query = attendanceCollection.whereEqualTo("class", clas);
+        Query query = attendanceCollection
+                .whereEqualTo("schoolId", schoolId)
+                .whereEqualTo("class", clas);
         ApiFuture<QuerySnapshot> querySnapshot = query.get();
         List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
         List<Map<String, Object>> attendanceRecords = new ArrayList<>();
