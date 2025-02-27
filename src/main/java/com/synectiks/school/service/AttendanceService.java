@@ -17,6 +17,9 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.cloud.FirestoreClient;
+import com.synectiks.school.entity.AttendanceRecord;
+import com.synectiks.school.entity.StudentAttendance;
+import com.synectiks.school.entity.TeacherAttendance;
 
 @Service
 public class AttendanceService {
@@ -26,50 +29,55 @@ public class AttendanceService {
         this.firestore = FirestoreClient.getFirestore();
     }
 
-
-    public String storeAttendanceDetails(List<Map<String, Object>> attendanceList) {
-        for (Map<String, Object> attendance : attendanceList) {
+    public String storeAttendanceDetails(List<StudentAttendance> attendanceList) {
+        for (StudentAttendance attendance : attendanceList) {
             try {
-                // Extract student ID from the attendance map
-                String studentId = (String) attendance.get("sid");
-                String studentName = (String) attendance.get("sname");
-                String clas = (String) attendance.get("class");
-                List<Map<String, Object>> newAttendanceRecords = (List<Map<String, Object>>) attendance.get("attendance");
+                String studentId = attendance.getSid();
+                String studentName = attendance.getSname();
+                String schoolId= attendance.getSchoolId();
+                String clas = attendance.getStudentClass();
+                List<AttendanceRecord> newAttendanceRecords = attendance.getAttendance();
 
-                // Get the student document reference
                 DocumentReference studentRef = firestore.collection("Attendance").document(studentId);
 
-                // Get the current document
-                ApiFuture<DocumentSnapshot> future = studentRef.get();
-                DocumentSnapshot document = future.get();
+                firestore.runTransaction(transaction -> {
+                    ApiFuture<DocumentSnapshot> future = transaction.get(studentRef);
+                    DocumentSnapshot document = future.get(); // Block and get the result
 
-                if (document.exists()) {
-                    // Get the current attendance array
-                    Map<String, Object> currentData = document.getData();
-                    List<Map<String, Object>> currentAttendanceList = (List<Map<String, Object>>) currentData.get("attendance");
+                    Map<String, Object> studentData = new HashMap<>();
+                    List<Map<String, Object>> currentAttendanceList = new ArrayList<>();
 
-                    // Append the new attendance records
-                    if (currentAttendanceList == null) {
-                        currentAttendanceList = new ArrayList<>();
+                    if (document.exists()) {
+                        // Retrieve existing data
+                        studentData = document.getData();
+                        currentAttendanceList = (List<Map<String, Object>>) studentData.getOrDefault("attendance", new ArrayList<>());
+                    } else {
+                        // Set basic student details for a new record
+                        studentData.put("sid", studentId);
+                        studentData.put("sname", studentName);
+                        studentData.put("class", clas);
+                        studentData.put("schoolId", schoolId);
                     }
-                    currentAttendanceList.addAll(newAttendanceRecords);
 
-                    // Update the document with the new attendance array
-                    currentData.put("attendance", currentAttendanceList);
-                    ApiFuture<WriteResult> writeResult = studentRef.set(currentData);
-                    writeResult.get(); // Wait for the write to complete
-                } else {
-                    // Create a new student document with the attendance record
-                    Map<String, Object> newStudentData = new HashMap<>();
-                    newStudentData.put("sid", studentId);
-                    newStudentData.put("sname", studentName);
-                    newStudentData.put("class", clas);
-                    newStudentData.put("attendance", newAttendanceRecords);
-                    ApiFuture<WriteResult> writeResult = studentRef.set(newStudentData);
-                    writeResult.get(); // Wait for the write to complete
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+                    // Convert new attendance records to Map<String, Object> and add them
+                    for (AttendanceRecord record : newAttendanceRecords) {
+                        Map<String, Object> attendanceMap = new HashMap<>();
+                        attendanceMap.put("period", record.getPeriod());
+                        attendanceMap.put("time", record.getTime());
+                        attendanceMap.put("present", record.isPresent());
+                        currentAttendanceList.add(attendanceMap);
+                    }
+
+                    studentData.put("attendance", currentAttendanceList);
+                    transaction.set(studentRef, studentData);
+
+                    return null;
+                }).get(); // Wait for transaction completion
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return "Operation interrupted while saving attendance.";
+            } catch (ExecutionException e) {
                 return "Error saving attendance: " + e.getMessage();
             }
         }
@@ -77,61 +85,57 @@ public class AttendanceService {
     }
 
     
-    public String storeTeacherAttendanceDetails(Map<String, Object> attendance) {
+    public String storeTeacherAttendanceDetails(TeacherAttendance attendance) {
         try {
-            // Extract student ID from the attendance map
-            String employeeId = (String) attendance.get("employeeId");
-            String employeeName = (String) attendance.get("name");
-           
-//            String clas = (String) attendance.get("class");
-            List<Map<String, Object>> newAttendanceRecords = (List<Map<String, Object>>) attendance.get("attendance");
+            String employeeId = attendance.getEmployeeId();
+            String employeeName = attendance.getName();
+            String schoolId = attendance.getSchoolId();
+            List<AttendanceRecord> newAttendanceRecords = attendance.getAttendance();
 
-            // Get the student document reference
-            DocumentReference studentRef = firestore.collection("Teacher Attendance").document(employeeId);
+            DocumentReference teacherRef = firestore.collection("Teacher_Attendance").document(employeeId);
 
-            // Get the current document
-            ApiFuture<DocumentSnapshot> future = studentRef.get();
+            ApiFuture<DocumentSnapshot> future = teacherRef.get();
             DocumentSnapshot document = future.get();
 
+            Map<String, Object> teacherData = new HashMap<>();
+            List<Map<String, Object>> currentAttendanceList;
+
             if (document.exists()) {
-                // Get the current attendance array
-                Map<String, Object> currentData = document.getData();
-                List<Map<String, Object>> currentAttendanceList = (List<Map<String, Object>>) currentData.get("attendance");
-
-                // Append the new attendance records
-                if (currentAttendanceList == null) {
-                    currentAttendanceList = new ArrayList<>();
-                }
-                currentAttendanceList.addAll(newAttendanceRecords);
-
-                // Update the document with the new attendance array
-                currentData.put("attendance", currentAttendanceList);
-                ApiFuture<WriteResult> writeResult = studentRef.set(currentData);
-                return "Attendance updated successfully for student ID: " + employeeId;
+                teacherData = document.getData();
+                currentAttendanceList = (List<Map<String, Object>>) teacherData.getOrDefault("attendance", new ArrayList<>());
             } else {
-                // Create a new student document with the attendance record
-                Map<String, Object> newStudentData = new HashMap<>();
-                newStudentData.put("employeeId", employeeId);
-                newStudentData.put("name", employeeName);
-//                newStudentData.put("class", clas);
-                newStudentData.put("attendance", newAttendanceRecords);
-                ApiFuture<WriteResult> writeResult = studentRef.set(newStudentData);
-                return "Attendance saved successfully for Employee ID: " + employeeId;
+                teacherData.put("employeeId", employeeId);
+                teacherData.put("name", employeeName);
+                teacherData.put("schoolId", schoolId);
+                currentAttendanceList = new ArrayList<>();
             }
+
+            for (AttendanceRecord record : newAttendanceRecords) {
+                Map<String, Object> attendanceMap = new HashMap<>();
+                attendanceMap.put("period", record.getPeriod());
+                attendanceMap.put("time", record.getTime());
+//                attendanceMap.put("present", record.isPresent());
+                currentAttendanceList.add(attendanceMap);
+            }
+
+            teacherData.put("attendance", currentAttendanceList);
+            ApiFuture<WriteResult> writeResult = teacherRef.set(teacherData);
+            return "Attendance saved successfully for Employee ID: " + employeeId;
+
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            
             return "Error saving attendance: " + e.getMessage();
         }
     }
     
-    public List<Map<String, Object>> getAllAttendanceData() {
+    public List<Map<String, Object>> getAllAttendanceData(String schoolId) {
         List<Map<String, Object>> results = new ArrayList<>();
         try {
             // Get the collection reference
-            CollectionReference studentsCollection = firestore.collection("Attendance");
+            CollectionReference attendanceCollection = firestore.collection("Attendance");
 
-            // Query the collection
-            ApiFuture<QuerySnapshot> querySnapshot = studentsCollection.get();
+            // Create a query against the collection
+            ApiFuture<QuerySnapshot> querySnapshot = attendanceCollection.whereEqualTo("schoolId", schoolId).get();
 
             // Process the query results
             for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
@@ -139,7 +143,7 @@ public class AttendanceService {
                 results.add(studentData);
             }
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+         
         }
         return results;
     }
@@ -163,14 +167,14 @@ public class AttendanceService {
         return filteredResults;
     }
     
-    public List<Map<String, Object>> getAllTeacherAttendanceData() {
+    public List<Map<String, Object>> getAllTeacherAttendanceData(String schoolId) {
         List<Map<String, Object>> results = new ArrayList<>();
         try {
             // Get the collection reference
-            CollectionReference teacherCollection = firestore.collection("Teacher Attendance");
+            CollectionReference teacherCollection = firestore.collection("Teacher_Attendance");
 
-            // Query the collection
-            ApiFuture<QuerySnapshot> querySnapshot = teacherCollection.get();
+            // Create a query against the collection
+            ApiFuture<QuerySnapshot> querySnapshot = teacherCollection.whereEqualTo("schoolId", schoolId).get();
 
             // Process the query results
             for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
@@ -178,7 +182,6 @@ public class AttendanceService {
                 results.add(teacherData);
             }
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
         }
         return results;
     }
@@ -198,5 +201,28 @@ public class AttendanceService {
             }
         }
         return filteredResults;
+    }
+
+	public List<Map<String, Object>> getstudentAttendanceData(String schoolId, String studentClass) {
+        List<Map<String, Object>> results = new ArrayList<>();
+        try {
+            // Get the collection reference
+            CollectionReference attendanceCollection = firestore.collection("Attendance");
+
+            // Create a query against the collection
+            ApiFuture<QuerySnapshot> querySnapshot = attendanceCollection
+                    .whereEqualTo("schoolId", schoolId)
+                    .whereEqualTo("class", studentClass)
+                    .get();
+
+            // Process the query results
+            for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
+                Map<String, Object> studentData = document.getData();
+                results.add(studentData);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            
+        }
+        return results;
     }
 }

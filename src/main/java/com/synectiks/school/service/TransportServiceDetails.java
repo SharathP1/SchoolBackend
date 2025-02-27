@@ -12,6 +12,7 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.cloud.FirestoreClient;
+import com.synectiks.school.entity.BusRoute;
 
 @Service
 public class TransportServiceDetails {
@@ -23,19 +24,24 @@ public class TransportServiceDetails {
         this.firestore = FirestoreClient.getFirestore();
     }
     
-	public void addingTransportDetails(List<Map<String, Object>> bustransport)  {
-		// TODO Auto-generated method stub
-		CollectionReference TransportCollection = firestore.collection("Transport_details");
-		
-		for (Map<String, Object> Busdetails: bustransport) {
-			String id = UUID.randomUUID().toString();
-			Busdetails.put("id", id);
-			
-			DocumentReference TransportDocument = TransportCollection.document(id);
-			ApiFuture<WriteResult> Inserting_data_in_Document = TransportDocument.set(Busdetails);
-			
-		}
-		
-	}
+	public void addingTransportDetails(List<BusRoute> bustransport,String schoolId)  {
+		 CollectionReference transportCollection = firestore.collection("Transport_details");
+
+	        for (BusRoute busDetails : bustransport) {
+	            try {
+	            	 String id = UUID.randomUUID().toString();
+	                 busDetails.setId(id);
+	                 busDetails.setSchoolId(schoolId);
+	                DocumentReference transportDocument = transportCollection.document(id);
+	                ApiFuture<WriteResult> resultFuture = transportDocument.set(busDetails);
+
+	                // Optionally, wait for the write operation to complete
+	                resultFuture.get();
+	                
+	            } catch (Exception e) {
+	               
+	            }
+	        }
+	    }
 }
 
