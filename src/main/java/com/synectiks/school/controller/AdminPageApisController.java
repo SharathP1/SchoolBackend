@@ -1,4 +1,4 @@
-package com.synectiks.school.controller;
+	package com.synectiks.school.controller;
 
 import java.util.List;
 import java.util.Map;
