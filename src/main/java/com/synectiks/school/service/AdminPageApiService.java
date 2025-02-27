@@ -20,15 +20,19 @@ import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.cloud.FirestoreClient;
+import com.synectiks.school.entity.StudentFeeDetails;
 
 @Service
 public class AdminPageApiService {
 	  private final Firestore db = FirestoreClient.getFirestore();
 
-	    public String addFeeDetails(Map<String, Object> transactionDetails) {
+	    public String addFeeDetails(StudentFeeDetails transactionDetails,String schoolId) {
 	        try {
 	            CollectionReference transactionsCollection = db.collection("Fee_Details");
-	            transactionDetails.put("date", LocalDate.now().format(DateTimeFormatter.ISO_DATE)); // Storing date as yyyy-MM-dd
+	            System.out.println(transactionDetails);
+	            transactionDetails.setSchoolId(schoolId);
+	            System.out.println(transactionDetails);
+//	            transactionDetails.put("date", LocalDate.now().format(DateTimeFormatter.ISO_DATE)); // Storing date as yyyy-MM-dd
 	            ApiFuture<DocumentReference> future = transactionsCollection.add(transactionDetails);
 	            DocumentReference document = future.get();
 	            return "Transaction added successfully with ID: " + document.getId();
