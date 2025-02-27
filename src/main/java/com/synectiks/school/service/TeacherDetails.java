@@ -34,10 +34,13 @@ public class TeacherDetails {
     
     
 
-    // Adding a Teacher's Details with class name
     public void addTeacher(Map<String, Object> teacherDetails, String className) {
+        if (teacherDetails == null) {
+            throw new IllegalArgumentException("Teacher details cannot be null");
+        }
         CollectionReference teacherCollection = firestore.collection("Teacher_Details");
 
+        // Generate the id in the backend
         String id = UUID.randomUUID().toString();
         teacherDetails.put("id", id);
         teacherDetails.put("className", className);
@@ -45,6 +48,9 @@ public class TeacherDetails {
         DocumentReference teacherDocument = teacherCollection.document(id);
         ApiFuture<WriteResult> insertingDataInDocument = teacherDocument.set(teacherDetails);
     }
+
+
+
 
     // Adding Periods for a Teacher based on Employee Name and Class
     public void addPeriods(String employeeName, String className, Map<String, Object> periods) throws InterruptedException, ExecutionException {
