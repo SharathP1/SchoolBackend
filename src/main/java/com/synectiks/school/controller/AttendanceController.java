@@ -18,12 +18,19 @@ import com.synectiks.school.service.AttendanceService;
 public class AttendanceController {
 	@Autowired
 	private AttendanceService attendanceService;
-	@PostMapping("/attendance")
-	public List<Map<String,Object>> studentAttendance(@RequestBody List<Map<String, Object>>  attendance) {
 	
-		attendanceService.storeAttendanceDetails(attendance);
-		return attendance;
-	}
+	
+	 @PostMapping("/attendance")
+	    public List<Map<String, Object>> studentAttendance(@RequestBody List<Map<String, Object>> attendance) {
+	        try {
+	            attendanceService.storeAttendanceDetails(attendance);
+	            return attendance;
+	        } catch (Exception e) {
+	            // Handle the exception (e.g., log it, return an error response)
+	            e.printStackTrace();
+	            throw new RuntimeException("Failed to store attendance details");
+	        }
+	    }
 	
 	@PostMapping("/teacher-attendance")
 	public Map<String, Object> studentAttendance1(@RequestBody Map<String, Object> attendance) {
@@ -41,6 +48,7 @@ public class AttendanceController {
 	    @GetMapping("/Studentattendancefilter")
 	    public List<Map<String, Object>> filterAttendanceData(
 	    		@RequestParam(required = false) String name,
+	    		@RequestParam(required = false) String sid,
 	            @RequestParam(required = false) String period,
 	            @RequestParam(required = false) String time) {
 	        List<Map<String, Object>> allData = attendanceService.getAllAttendanceData();
