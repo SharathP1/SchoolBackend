@@ -150,6 +150,7 @@ public class AttendanceService {
             List<Map<String, Object>> attendanceList = (List<Map<String, Object>>) studentData.get("attendance");
             if (attendanceList != null) {
                 for (Map<String, Object> attendance : attendanceList) {
+                	String studentid = (String) attendance.get("sid");
                 	String attendanceName = (String) attendance.get("name");
                     String attendancePeriod = (String) attendance.get("period");
                     String attendanceTime = (String) attendance.get("time");
