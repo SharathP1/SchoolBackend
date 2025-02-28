@@ -1,27 +1,62 @@
 package com.synectiks.school.entity;
 
+import com.google.cloud.firestore.annotation.PropertyName;
+
 public class StudentDetails {
 
+    @PropertyName("Aadhaar_Number")
     private String aadhaarNumber;
+
+    @PropertyName("Address")
     private String address;
+
+    @PropertyName("Admission_Name")
     private String admissionName;
+
+    @PropertyName("Age")
     private String age;
+
+    @PropertyName("Class")
     private String studentClass;
+
+    @PropertyName("DOB")
     private String dob;
+
+    @PropertyName("Email")
     private String email;
+
+    @PropertyName("Father_Name")
     private String fatherName;
+
+    @PropertyName("Father_Occupation")
     private String fatherOccupation;
+
+    @PropertyName("Gender")
     private String gender;
+
+    @PropertyName("Mother_Name")
     private String motherName;
+
+    @PropertyName("Mother_Occupation")
     private String motherOccupation;
+
+    @PropertyName("Phone_Number")
     private String phoneNumber;
+
+    @PropertyName("RollNumber")
     private String rollNumber;
+
+    @PropertyName("Route_Name")
     private String routeName;
 
+    @PropertyName("Student_Name")
     private String studentName;
-    private String schoolId;
-    private String id;
 
+    @PropertyName("schoolId")
+    private String schoolId;
+
+    @PropertyName("id")
+    private String id;
 
     // Getters and Setters
     public String getAadhaarNumber() {
@@ -144,7 +179,6 @@ public class StudentDetails {
         this.routeName = routeName;
     }
 
-
     public String getStudentName() {
         return studentName;
     }
@@ -161,25 +195,21 @@ public class StudentDetails {
         this.id = id;
     }
 
-	public String getSchoolId() {
-		return schoolId;
-	}
+    public String getSchoolId() {
+        return schoolId;
+    }
 
-	public void setSchoolId(String schoolId) {
-		this.schoolId = schoolId;
-	}
+    public void setSchoolId(String schoolId) {
+        this.schoolId = schoolId;
+    }
 
-	@Override
-	public String toString() {
-		return "StudentDetails [aadhaarNumber=" + aadhaarNumber + ", address=" + address + ", admissionName="
-				+ admissionName + ", age=" + age + ", studentClass=" + studentClass + ", dob=" + dob + ", email="
-				+ email + ", fatherName=" + fatherName + ", fatherOccupation=" + fatherOccupation + ", gender=" + gender
-				+ ", motherName=" + motherName + ", motherOccupation=" + motherOccupation + ", phoneNumber="
-				+ phoneNumber + ", rollNumber=" + rollNumber + ", routeName=" + routeName 
-				+ ", studentName=" + studentName + ", schoolId=" + schoolId + ", id=" + id + "]";
-	}
-
-    
-    
-   
+    @Override
+    public String toString() {
+        return "StudentDetails [aadhaarNumber=" + aadhaarNumber + ", address=" + address + ", admissionName="
+                + admissionName + ", age=" + age + ", studentClass=" + studentClass + ", dob=" + dob + ", email="
+                + email + ", fatherName=" + fatherName + ", fatherOccupation=" + fatherOccupation + ", gender=" + gender
+                + ", motherName=" + motherName + ", motherOccupation=" + motherOccupation + ", phoneNumber="
+                + phoneNumber + ", rollNumber=" + rollNumber + ", routeName=" + routeName
+                + ", studentName=" + studentName + ", schoolId=" + schoolId + ", id=" + id + "]";
+    }
 }

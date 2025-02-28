@@ -47,42 +47,21 @@ public class FeeDetails {
     }
 
     // Retrieve all fee details
-    public List<Map<String, Object>> getFeeDetails(String sid) throws InterruptedException, ExecutionException {
-        CollectionReference feeDetailsTable = firestore.collection("Fee_Details");
-  System.out.println("#####");
-     // Query the collection to find documents where the 'sid' field matches the given sid
-	    Query query = feeDetailsTable.whereEqualTo("sid", sid);
-	    ApiFuture<QuerySnapshot> querySnapshot = query.get();
+    public List<StudentFeeDetails> getFeeDetails(String sid, String schoolId) throws InterruptedException, ExecutionException {
+    	  CollectionReference feeDetailsTable = firestore.collection("Fee_Details");
 
-	    List<Map<String, Object>> t = new ArrayList<>();
+          Query query = feeDetailsTable
+                  .whereEqualTo("schoolId", schoolId);
 
-	    for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
-	        // Add the document data (as a map) to the list
-	        t.add(document.getData());
-	    }
-	    System.out.println("$$$"+t);
-//        ApiFuture<QuerySnapshot> querySnapshot = feeDetailsTable.get();
-//        // Process the query snapshot to get document details
-//        List<QueryDocumentSnapshot> documents = querySnapshot.get().getDocuments();
-//        List<Map<String, Object>> feeDetailsList = new ArrayList<>();
-//
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH); // Format: Day/Month/Year
-//
-//        for (QueryDocumentSnapshot details : documents) {
-//            Map<String, Object> data = details.getData();
-//            Object timestampObj = data.get("Payment_On");
-//
-//            if (timestampObj instanceof Timestamp) {
-//                Timestamp timestamp = (Timestamp) timestampObj;
-//                Date date = timestamp.toDate();
-//                data.put("Payment_On", dateFormat.format(date)); // Convert and format date
-//            }
-//
-//            feeDetailsList.add(data);
-//        }
+          ApiFuture<QuerySnapshot> querySnapshot = query.get();
+          List<StudentFeeDetails> feeList = new ArrayList<>();
 
-        return t;
-    }
+          for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
+              feeList.add(document.toObject(StudentFeeDetails.class)); 
+          }
+  System.out.println(feeList);
+          return feeList;
+      }
     
     public List<StudentFeeDetails> getFeeDetails1(String clas, String schoolId) throws InterruptedException, ExecutionException {
         CollectionReference feeDetailsTable = firestore.collection("Fee_Details");
