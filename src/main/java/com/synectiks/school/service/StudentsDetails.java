@@ -146,7 +146,7 @@ public class StudentsDetails {
 	        // Query by schoolId and rollNumber
 	        ApiFuture<QuerySnapshot> future = studentCollection
 	                .whereEqualTo("schoolId", schoolId)
-	                .whereEqualTo("RollNumber", rollNumber)
+	                .whereEqualTo("rollNumber", rollNumber)
 	                .limit(1) // Fetch only one result
 	                .get();
 

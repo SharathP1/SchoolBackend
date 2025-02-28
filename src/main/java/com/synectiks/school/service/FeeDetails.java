@@ -2,7 +2,9 @@ package com.synectiks.school.service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -63,6 +65,24 @@ public class FeeDetails {
           return feeList;
       }
     
+    public List<StudentFeeDetails> getFeeDetails2(String sid, String schoolId) throws InterruptedException, ExecutionException {
+  	  CollectionReference feeDetailsTable = firestore.collection("Fee_Details");
+
+        Query query = feeDetailsTable
+        		 .whereEqualTo("sid", sid)
+                .whereEqualTo("schoolId", schoolId);
+        
+
+        ApiFuture<QuerySnapshot> querySnapshot = query.get();
+        List<StudentFeeDetails> feeList = new ArrayList<>();
+
+        for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
+            feeList.add(document.toObject(StudentFeeDetails.class)); 
+        }
+System.out.println(feeList);
+        return feeList;
+    }
+    
     public List<StudentFeeDetails> getFeeDetails1(String clas, String schoolId) throws InterruptedException, ExecutionException {
         CollectionReference feeDetailsTable = firestore.collection("Fee_Details");
 
@@ -79,6 +99,38 @@ public class FeeDetails {
 System.out.println(feeList);
         return feeList;
     }
+
+    public void updateFeeDetailsBySid(String sid, String schoolId, Collection<? extends FeeDetail> newFeeDetails) {
+        try {
+            CollectionReference transactionsCollection = firestore.collection("Fee_Details");
+            Query query = transactionsCollection.whereEqualTo("sid", sid).whereEqualTo("schoolId", schoolId);
+            ApiFuture<QuerySnapshot> querySnapshot = query.get();
+            QuerySnapshot queryResult = querySnapshot.get();
+
+            if (!queryResult.isEmpty()) {
+                QueryDocumentSnapshot document = queryResult.getDocuments().get(0);
+                DocumentReference documentReference = document.getReference();
+
+                Map<String, Object> existingData = document.getData();
+                List<FeeDetail> existingFeeDetails = (List<FeeDetail>) existingData.get("feedetails");
+                existingFeeDetails.addAll(newFeeDetails);
+
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("feedetails", existingFeeDetails);
+
+                ApiFuture<WriteResult> writeResult = documentReference.update(updates);
+                writeResult.get();
+                System.out.println("Fee details updated successfully.");
+            } else {
+                System.out.println("Document with sid " + sid + " and schoolId " + schoolId + " does not exist.");
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Error updating fee details: " + e.getMessage());
+        }
+    }
+
+    
 
 
     // Retrieve fee details based on parameters

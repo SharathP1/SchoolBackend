@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.synectiks.school.entity.StudentFeeDetails;
 import com.synectiks.school.service.AdminPageApiService;
+import com.synectiks.school.service.FeeDetails;
 
 
 
@@ -23,6 +26,9 @@ public class AdminPageApisController {
 	@Autowired
 	private AdminPageApiService adminpageapiservice;
 	
+	@Autowired
+	private FeeDetails details;
+	
 		@PostMapping("/add_fee_detais/{schoolId}")
 		public String feeDetails(@RequestBody StudentFeeDetails transactiondetails,@PathVariable String schoolId) throws InterruptedException, ExecutionException
 		{
@@ -31,6 +37,13 @@ public class AdminPageApisController {
 			return null;
 			
 		}
+		
+		@PutMapping("/update_fee_details/{schoolId}")
+		public void updateFeeDetailsBySid(@RequestParam String sid, String schoolId, @RequestBody List<FeeDetails> newFeeDetails) {
+			details.updateFeeDetailsBySid(sid, schoolId, newFeeDetails);
+		}
+		
+		
 		@GetMapping("/getFeeDetailsForCurrentMonth/{schoolId}")
 	 public List<Map<String, Object>> getfeedetails(@PathVariable String schoolId)
 	 {
@@ -59,4 +72,9 @@ public List<Map<String, Object>> allPaymentsWithPaidDate(@PathVariable String sc
 {
 return  adminpageapiservice.getAllPaymentsWithPaidDate(schoolId) ;
 }
+
+
 }
+
+
+

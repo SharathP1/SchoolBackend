@@ -19,11 +19,12 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.cloud.FirestoreClient;
 import com.synectiks.school.entity.StudentFeeDetails;
 
 @Service
-public class AdminPageApiService {
+public class AdminPageApiService<FeeDetail> {
 	  private final Firestore db = FirestoreClient.getFirestore();
 
 	    public String addFeeDetails(StudentFeeDetails transactionDetails,String schoolId) {
@@ -41,6 +42,9 @@ public class AdminPageApiService {
 	            return "Error adding transaction: " + e.getMessage();
 	        }
 	    }
+	    
+	    
+	    
 
 
 	    public List<Map<String, Object>> getFeeDetailsForCurrentMonth(String schoolId) {
