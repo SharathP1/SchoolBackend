@@ -5,6 +5,7 @@ public class ChatMessage {
     private MessageType type;
     private String sender;
     private String content;
+    private String role;
 
     public enum MessageType {
         JOIN, LEAVE, CHAT
@@ -65,4 +66,9 @@ public class ChatMessage {
     public void setContent(String content) {
         this.content = content;
     }
+
+	public Object getRole() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
