@@ -145,6 +145,12 @@ public List<StudentFeeDetails> getFeeDetails(@RequestParam String sid, @PathVari
     return feeDetails.getFeeDetails(sid,schoolId);
 }
 
+@GetMapping("get_Fee_Details_by_sid/school/{schoolId}")
+public List<StudentFeeDetails> getFeeDetails2(@RequestParam String sid, @PathVariable String schoolId) throws InterruptedException, ExecutionException {
+	System.out.println("#########");
+    return feeDetails.getFeeDetails2(sid,schoolId);
+}
+
 @GetMapping("get_Fee_Details_by_class/school/{schoolId}")
 public List<StudentFeeDetails> getFeeDetails1(@RequestParam String clas,@PathVariable String schoolId) throws InterruptedException, ExecutionException {
 	
