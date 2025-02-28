@@ -139,11 +139,11 @@ public List<StudentDetails> getMethodNamebyClass(@RequestParam String Class,@Pat
 //    return personaldetails ;
 //}
 
-//@GetMapping("get_Fee_Details")
-//public List<Map<String, Object>> getFeeDetails(@RequestParam String sid) throws InterruptedException, ExecutionException {
-//	System.out.println("#########");
-//    return feeDetails.getFeeDetails(sid);
-//}
+@GetMapping("get_Fee_Details/school/{schoolId}")
+public List<StudentFeeDetails> getFeeDetails(@RequestParam String sid, @PathVariable String schoolId) throws InterruptedException, ExecutionException {
+	System.out.println("#########");
+    return feeDetails.getFeeDetails(sid,schoolId);
+}
 
 @GetMapping("get_Fee_Details_by_class/school/{schoolId}")
 public List<StudentFeeDetails> getFeeDetails1(@RequestParam String clas,@PathVariable String schoolId) throws InterruptedException, ExecutionException {
