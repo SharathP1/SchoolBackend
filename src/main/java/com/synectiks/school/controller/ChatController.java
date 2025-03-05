@@ -1,46 +1,50 @@
 package com.synectiks.school.controller;
 
-import com.synectiks.school.entity.ChatMessage;
-import com.synectiks.school.model.Message;
-import com.synectiks.school.service.ChatService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import com.synectiks.school.entity.ChatMessage;
+import com.synectiks.school.service.ChatService;
 
 @Controller
+@CrossOrigin(origins = "http://localhost:3000")
 public class ChatController {
+    private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
     @Autowired
     private ChatService chatService;
 
     @GetMapping("/chat")
     public String chat() {
+        logger.info("Chat endpoint hit");
         return "chat";
     }
+
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-		return chatMessage;
-    	
+        logger.info("Message sent: {}", chatMessage);
+        return chatMessage;
     }
+
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
     public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-        // Store the username in the session attributes
+        logger.info("User added: {}", chatMessage);
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
         headerAccessor.getSessionAttributes().put("role", chatMessage.getRole());
         return chatMessage;
     }
+}
+
 
 //
 //    @PostMapping("/sendMessage/{chatId}")
@@ -98,4 +102,4 @@ public class ChatController {
 //            return ResponseEntity.status(500).body(response);
 //        }
 //    }
-}
+

@@ -20,6 +20,7 @@ import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.cloud.FirestoreClient;
+import com.synectiks.school.entity.AttendanceRecord;
 
 @Service
 public class AttendanceDetails {
@@ -30,18 +31,34 @@ private final Firestore firestore;
         this.firestore = FirestoreClient.getFirestore();
     }
     
-    public void markAttendance(Map<String, Object> attendanceDetail, String sid) {
+    public void markAttendance(Map<String, Object> attendanceDetail, String sid, String schoolId) {
+        // TODO Auto-generated method stub
+        CollectionReference attendanceCollection = firestore.collection("Attendance");
+
+        String id = UUID.randomUUID().toString();
+        attendanceDetail.put("sid", sid);
+        attendanceDetail.put("schoolId", schoolId); // Add schoolId
+        attendanceDetail.put("timestamp", FieldValue.serverTimestamp()); // Add Timestamp
+
+        DocumentReference attendanceDocument = attendanceCollection.document(id);
+        attendanceDocument.set(attendanceDetail);
+    }
+
+    
+    public void markDayWiseAttendance(Map<String, Object> attendanceDetail, String sid, String schoolId) {
 		// TODO Auto-generated method stub
-	    CollectionReference attendanceCollection = firestore.collection("Attendance");
+	    CollectionReference attendanceCollection = firestore.collection("Day-Wise-Attendance");
 
 	    String id = UUID.randomUUID().toString();
-//	    attendanceDetail.put("id", id);
 	    attendanceDetail.put("sid", sid);
+	    attendanceDetail.put("schoolId", schoolId); // Add schoolId
 	    attendanceDetail.put("timestamp", FieldValue.serverTimestamp()); // Add Timestamp
 
 	    DocumentReference attendanceDocument = attendanceCollection.document(id);
 	    attendanceDocument.set(attendanceDetail);
 	}
+
+    
 
     
     public List<Map<String, Object>> getAttendance(String schoolId, String sid) throws InterruptedException, ExecutionException {
@@ -181,6 +198,31 @@ private final Firestore firestore;
         }
         return attendanceList;
     }
+
+	public String getSid() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getSchoolId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getSname() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getStudentClass() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<AttendanceRecord> getAttendance() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 
 }
