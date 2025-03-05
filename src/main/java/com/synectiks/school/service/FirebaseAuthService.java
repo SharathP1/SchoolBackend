@@ -196,6 +196,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.UserRecord.CreateRequest;
 import com.google.firebase.cloud.FirestoreClient;
+import com.synectiks.school.service.GroupService;
 
 @Service
 public class FirebaseAuthService {
@@ -311,7 +312,7 @@ public class FirebaseAuthService {
 
         return results;
     }
-
+    
     private void createDefaultGroups(String schoolId, String adminUid) {
         // Define default groups with comprehensive permissions
         Map<String, List<String>> defaultGroups = new HashMap<>();
