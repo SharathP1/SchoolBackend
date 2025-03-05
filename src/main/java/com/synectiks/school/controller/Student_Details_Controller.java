@@ -70,10 +70,16 @@ public String addingStudentDetails(@RequestBody StudentDetails studentDetails,@P
 //	return "Fee Details recorded successfully!";
 //}
 
-@PostMapping("attendance/{sid}")
-public String markAttendance(@RequestBody Map<String, Object> attendanceDetail, @PathVariable String sid) {
-	attendanceDetails.markAttendance(attendanceDetail, sid);
+@PostMapping("attendance/{schoolId}/{sid}")
+public String markAttendance(@RequestBody Map<String, Object> attendanceDetail, @PathVariable String sid, @PathVariable String schoolId) {
+	attendanceDetails.markAttendance(attendanceDetail, sid, schoolId);
     return "Attendance recorded successfully!";
+}
+
+@PostMapping("day-wise-student-attendance/{schoolId}/{sid}")
+public String markDayWiseAttendance(@RequestBody Map<String, Object> attendanceDetail, @PathVariable String sid,@PathVariable String schoolId) {
+	attendanceDetails.markDayWiseAttendance(attendanceDetail, sid, schoolId);
+    return "Day wise Attendance recorded successfully!";
 }
 
 @PostMapping("student_attendance_per_period")
@@ -138,6 +144,14 @@ public List<StudentDetails> getMethodNamebyClass(@RequestParam String Class,@Pat
 //	List<Map<String, Object>> personaldetails= personalServiceDetails.getpersonaldetailsById(sid);
 //    return personaldetails ;
 //}
+
+@GetMapping("/get-transport-by-route-name/{schoolId}/{routeName}")
+public List<BusRoute> getTransportDetails(
+    @PathVariable String routeName,
+    @PathVariable String schoolId
+) throws ExecutionException, InterruptedException {
+    return transportServiceDetails.getTransportDetailsByRouteNameAndSchoolId(routeName, schoolId);
+}
 
 @GetMapping("get_Fee_Details/school/{schoolId}")
 public List<StudentFeeDetails> getFeeDetails(@RequestParam String sid, @PathVariable String schoolId) throws InterruptedException, ExecutionException {
