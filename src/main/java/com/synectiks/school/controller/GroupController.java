@@ -84,6 +84,19 @@ public class GroupController {
         groupService.removeUserFromGroup(schoolId, groupName, userId);
         return ResponseEntity.ok("User removed from group successfully");
     }
+    
+    
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getGroupsByUserId(@PathVariable String schoolId, @PathVariable String userId) {
+        try {
+            List<Map<String, Object>> groups = groupService.getGroupsByUserId(schoolId, userId);
+            return ResponseEntity.ok(groups);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error fetching groups for user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
 }
 
 
