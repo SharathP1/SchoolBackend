@@ -28,20 +28,19 @@ import com.synectiks.school.service.AttendanceService;
 public class AttendanceController {
 	@Autowired
 	private AttendanceService attendanceService;
-	 @PostMapping("/student-attendance/{schoolId}/{studentId}")
-	    public ResponseEntity<String> storeAttendanceDetails(
-	        @PathVariable String schoolId,
-	        @PathVariable String studentId,
-	        @RequestBody AttendanceDetails attendanceDetails) {
+	@PostMapping("/student-attendance/{schoolId}")
+	public ResponseEntity<String> storeAttendanceDetails(
+	    @PathVariable String schoolId,
+	    @RequestBody List<AttendanceDetails> attendanceDetailsList) {
 
-	        // Set the schoolId and studentId in the attendanceDetails object
+	    // Set the schoolId in each attendanceDetails object
+	    for (AttendanceDetails attendanceDetails : attendanceDetailsList) {
 	        attendanceDetails.setSchoolId(schoolId);
-	        attendanceDetails.setSid(studentId);
-
-	        String result = attendanceService.storeAttendanceDetails(attendanceDetails);
-	        return ResponseEntity.ok(result);
 	    }
 
+	    String result = attendanceService.storeAttendanceDetails(attendanceDetailsList);
+	    return ResponseEntity.ok(result);
+	}
 
 
 
@@ -97,6 +96,24 @@ public class AttendanceController {
 	        return attendanceData;
 	    }
 	    
+	    @GetMapping("/oneStudentAttendance/{schoolId}/{sid}/{date}")
+	    public ResponseEntity<List<Map<String, Object>>> getAttendanceData(
+	            @PathVariable String schoolId,
+	            @PathVariable String sid,
+	            @PathVariable String date) {
+	        System.out.println("Received request for schoolId: " + schoolId + ", sid: " + sid + ", and date: " + date);
+	        
+	        List<Map<String, Object>> attendanceData = attendanceService.getAttendanceData1(schoolId, sid, date);
+	        System.out.println("Attendance data retrieved: " + attendanceData);
+	        
+	        return ResponseEntity.ok(attendanceData);
+	    }
+
+
+
+
+
+	    
 	    @GetMapping("/day-wise-single-StudentAttendance/{schoolId}/{sid}")
 	    public List<Map<String, Object>> getDayAttendanceData(
 	            @PathVariable String schoolId,
@@ -131,6 +148,22 @@ public class AttendanceController {
 
 	        System.out.println("Fetching month-wise attendance for schoolId: " + schoolId + ", sid: " + sid + ", month: " + month);
 	        List<Map<String, Object>> attendanceData = attendanceService.getMonthAttendanceData(schoolId, sid, month);
+
+	        if (attendanceData.isEmpty()) {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(attendanceData);
+	        }
+
+	        return ResponseEntity.ok(attendanceData);
+	    }
+	    
+	    @GetMapping("/year-wise-single-StudentAttendance/{schoolId}/{sid}/{year}")
+	    public ResponseEntity<List<Map<String, Object>>> getYearAttendanceData(
+	            @PathVariable String schoolId,
+	            @PathVariable String sid,
+	            @PathVariable String year) {
+
+	        System.out.println("Fetching year-wise attendance for schoolId: " + schoolId + ", sid: " + sid + ", month: " + year);
+	        List<Map<String, Object>> attendanceData = attendanceService.getYearAttendanceData(schoolId, sid, year);
 
 	        if (attendanceData.isEmpty()) {
 	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(attendanceData);

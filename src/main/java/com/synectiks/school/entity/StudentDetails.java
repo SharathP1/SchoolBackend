@@ -57,6 +57,10 @@ public class StudentDetails {
 
     @PropertyName("id")
     private String id;
+    
+    @PropertyName("password")
+    private String password;
+
 
     // Getters and Setters
     public String getAadhaarNumber() {
@@ -109,6 +113,14 @@ public class StudentDetails {
 
     public String getEmail() {
         return email;
+    }
+    
+    public String getPassword() {
+        return password;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setEmail(String email) {

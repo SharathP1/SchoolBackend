@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,4 +64,17 @@ public class AdminPageApisController {
         System.out.println("All Payments with Paid Date: " + paymentList); // Log the data
         return paymentList;
     }
+    
+    @PutMapping("/update_fee_details/{schoolId}")
+    public String updateFeeDetails(@RequestBody Map<String, List<Map<String, Object>>> requestBody, @PathVariable String schoolId, @RequestParam String sid) throws InterruptedException, ExecutionException {
+        List<Map<String, Object>> feeDetails = requestBody.get("feeDetails");
+        adminPageApiService.updateFeeDetailsBySid(sid, schoolId, feeDetails);
+        return "Fee Details Updated Successfully";
+    }
+
+
+
+
+
+
 }

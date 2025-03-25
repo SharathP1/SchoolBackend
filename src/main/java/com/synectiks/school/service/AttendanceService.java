@@ -31,65 +31,64 @@ public class AttendanceService {
         this.firestore = FirestoreClient.getFirestore();
     }
     
-    
-
-    public String storeAttendanceDetails(AttendanceDetails attendanceDetails) {
+    public String storeAttendanceDetails(List<AttendanceDetails> attendanceDetailsList) {
         try {
-            String studentId = attendanceDetails.getSid();
-            String schoolId = attendanceDetails.getSchoolId();
+            for (AttendanceDetails attendanceDetails : attendanceDetailsList) {
+                String studentId = attendanceDetails.getSid();
+                String schoolId = attendanceDetails.getSchoolId();
 
-            // Check if the student exists in the Student_Details collection
-            DocumentReference studentDetailsRef = firestore.collection("Student_Details").document(studentId);
-            ApiFuture<DocumentSnapshot> studentDetailsFuture = studentDetailsRef.get();
-            DocumentSnapshot studentDetailsDocument = studentDetailsFuture.get();
+                // Check if the student exists in the Student_Details collection
+                DocumentReference studentDetailsRef = firestore.collection("Student_Details").document(studentId);
+                ApiFuture<DocumentSnapshot> studentDetailsFuture = studentDetailsRef.get();
+                DocumentSnapshot studentDetailsDocument = studentDetailsFuture.get();
 
-            if (studentDetailsDocument.exists() &&
-                schoolId.equals(studentDetailsDocument.getString("schoolId")) &&
-                studentId.equals(studentDetailsDocument.getString("id"))) {
+                if (studentDetailsDocument.exists() &&
+                    schoolId.equals(studentDetailsDocument.getString("schoolId")) &&
+                    studentId.equals(studentDetailsDocument.getString("id"))) {
 
-                String studentName = attendanceDetails.getSname();
-                String clas = attendanceDetails.getStudentClass();
-                List<AttendanceRecord> newAttendanceRecords = attendanceDetails.getAttendance();
+                    String studentName = attendanceDetails.getSname();
+                    String clas = attendanceDetails.getStudentClass();
+                    List<AttendanceRecord> newAttendanceRecords = attendanceDetails.getAttendance();
 
-                DocumentReference studentRef = firestore.collection("Attendance").document(studentId);
+                    DocumentReference studentRef = firestore.collection("Attendance").document(studentId);
 
-                firestore.runTransaction(transaction -> {
-                    ApiFuture<DocumentSnapshot> future = transaction.get(studentRef);
-                    DocumentSnapshot document = future.get(); // Block and get the result
+                    firestore.runTransaction(transaction -> {
+                        ApiFuture<DocumentSnapshot> future = transaction.get(studentRef);
+                        DocumentSnapshot document = future.get(); // Block and get the result
 
-                    Map<String, Object> studentData = new HashMap<>();
-                    List<Map<String, Object>> currentAttendanceList = new ArrayList<>();
+                        Map<String, Object> studentData = new HashMap<>();
+                        List<Map<String, Object>> currentAttendanceList = new ArrayList<>();
 
-                    if (document.exists()) {
-                        // Retrieve existing data
-                        studentData = document.getData();
-                        currentAttendanceList = (List<Map<String, Object>>) studentData.getOrDefault("attendance", new ArrayList<>());
-                    } else {
-                        // Set basic student details for a new record
-                        studentData.put("sid", studentId);
-                        studentData.put("sname", studentName);
-                        studentData.put("class", clas);
-                        studentData.put("schoolId", schoolId);
-                    }
+                        if (document.exists()) {
+                            // Retrieve existing data
+                            studentData = document.getData();
+                            currentAttendanceList = (List<Map<String, Object>>) studentData.getOrDefault("attendance", new ArrayList<>());
+                        } else {
+                            // Set basic student details for a new record
+                            studentData.put("sid", studentId);
+                            studentData.put("sname", studentName);
+                            studentData.put("class", clas);
+                            studentData.put("schoolId", schoolId);
+                        }
 
-                    // Convert new attendance records to Map<String, Object> and add them
-                    for (AttendanceRecord record : newAttendanceRecords) {
-                        Map<String, Object> attendanceMap = new HashMap<>();
-                        attendanceMap.put("period", record.getPeriod());
-                        attendanceMap.put("time", record.getTime());
-                        attendanceMap.put("present", record.isPresent());
-                        currentAttendanceList.add(attendanceMap);
-                    }
+                        // Convert new attendance records to Map<String, Object> and add them
+                        for (AttendanceRecord record : newAttendanceRecords) {
+                            Map<String, Object> attendanceMap = new HashMap<>();
+                            attendanceMap.put("period", record.getPeriod());
+                            attendanceMap.put("time", record.getTime());
+                            attendanceMap.put("present", record.isPresent());
+                            currentAttendanceList.add(attendanceMap);
+                        }
 
-                    studentData.put("attendance", currentAttendanceList);
-                    transaction.set(studentRef, studentData);
+                        studentData.put("attendance", currentAttendanceList);
+                        transaction.set(studentRef, studentData);
 
-                    return null;
-                }).get(); // Wait for transaction completion
-            } else {
-                return "Student ID, School ID, or ID does not match.";
+                        return null;
+                    }).get(); // Wait for transaction completion
+                } else {
+                    return "Student ID, School ID, or ID does not match.";
+                }
             }
-
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return "Operation interrupted while saving attendance.";
@@ -98,8 +97,6 @@ public class AttendanceService {
         }
         return "Attendance saved successfully.";
     }
-
-
 
 
     public String storeDayAttendanceDetails(List<StudentAttendance> attendanceList) {
@@ -286,6 +283,71 @@ public class AttendanceService {
         return results;
     }
     
+    public List<Map<String, Object>> getAttendanceData1(String schoolId, String sid, String dateParam) {
+        List<Map<String, Object>> results = new ArrayList<>();
+        try {
+            System.out.println("Fetching ALL attendance data for schoolId: " + schoolId + ", sid: " + sid + 
+                              ", date: " + dateParam);
+
+            CollectionReference attendanceCollection = firestore.collection("Attendance");
+            ApiFuture<QuerySnapshot> querySnapshotApiFuture = attendanceCollection
+                    .whereEqualTo("schoolId", schoolId)
+                    .whereEqualTo("sid", sid)
+                    .get();
+
+            QuerySnapshot querySnapshot = querySnapshotApiFuture.get();
+            System.out.println("Query snapshot obtained. Number of documents: " + querySnapshot.size());
+
+            for (QueryDocumentSnapshot document : querySnapshot.getDocuments()) {
+                Map<String, Object> studentData = new HashMap<>(document.getData());
+                List<Map<String, Object>> attendanceList = (List<Map<String, Object>>) studentData.get("attendance");
+
+                System.out.println("🔥 Full attendanceList before filtering: " + attendanceList);
+
+                if (attendanceList == null || attendanceList.isEmpty()) continue;
+
+                // New list to hold all matched attendance records
+                List<Map<String, Object>> filteredAttendanceList = new ArrayList<>();
+
+                for (Map<String, Object> attendance : attendanceList) {
+                    String timeValue = (String) attendance.get("time");
+
+                    // Debugging: Print each time value
+                    System.out.println("Checking record time: '" + timeValue + "' against dateParam: '" + dateParam + "'");
+
+                    if (timeValue != null && timeValue.trim().equals(dateParam.trim())) {
+                        filteredAttendanceList.add(attendance);
+                        System.out.println("✅ Matched record -> time: " + timeValue + ", period: " + attendance.get("period") + ", present: " + attendance.get("present"));
+                    }
+                }
+
+                if (!filteredAttendanceList.isEmpty()) {
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("schoolId", studentData.get("schoolId"));
+                    result.put("sid", studentData.get("sid"));
+                    result.put("sname", studentData.get("sname"));
+                    result.put("class", studentData.get("class"));
+                    // Store all matching attendance records
+                    result.put("attendance", filteredAttendanceList);
+                    results.add(result);
+                    System.out.println("✅ Added " + filteredAttendanceList.size() + " matching attendance records.");
+                }
+            }
+
+            if (results.isEmpty()) {
+                System.out.println("⚠️ No matching attendance records found for date: " + dateParam);
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            System.err.println("Error fetching attendance data: " + e.getMessage());
+        }
+
+        return results;
+    }
+
+
+    
     public List<Map<String, Object>> getDayAttendanceData(String schoolId, String sid) {
         List<Map<String, Object>> results = new ArrayList<>();
         try {
@@ -404,6 +466,49 @@ public class AttendanceService {
         }
         return results;
     }
+    
+    public List<Map<String, Object>> getYearAttendanceData(String schoolId, String sid, String requestedYear) {
+        List<Map<String, Object>> results = new ArrayList<>();
+
+        try {
+            System.out.println("Fetching attendance for schoolId: " + schoolId + ", sid: " + sid + ", year: " + requestedYear);
+
+            CollectionReference attendanceCollection = firestore.collection("Day-Wise-Attendance");
+
+            ApiFuture<QuerySnapshot> querySnapshotApiFuture = attendanceCollection
+                    .whereEqualTo("schoolId", schoolId)
+                    .whereEqualTo("sid", sid)
+                    .get();
+
+            QuerySnapshot querySnapshot = querySnapshotApiFuture.get();
+
+            for (QueryDocumentSnapshot document : querySnapshot.getDocuments()) {
+                Map<String, Object> studentData = document.getData();
+                List<Map<String, Object>> attendanceList = (List<Map<String, Object>>) studentData.get("attendance");
+
+                List<Map<String, Object>> filteredAttendance = new ArrayList<>();
+                for (Map<String, Object> record : attendanceList) {
+                    String recordTime = (String) record.get("time"); // Get stored timestamp
+                    String recordYear = recordTime.substring(0, 4); // Extract yyyy
+
+                    if (recordYear.equals(requestedYear)) { // Compare with requested year
+                        filteredAttendance.add(record);
+                    }
+                }
+
+                if (!filteredAttendance.isEmpty()) {
+                    Map<String, Object> resultEntry = new HashMap<>(studentData);
+                    resultEntry.put("attendance", filteredAttendance); // Store only matching records
+                    results.add(resultEntry);
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            System.err.println("Error fetching attendance data: " + e.getMessage());
+        }
+        return results;
+    }
+
 
     
     public List<Map<String, Object>> filterAttendanceData(List<Map<String, Object>> data, String name, String period, String time) {

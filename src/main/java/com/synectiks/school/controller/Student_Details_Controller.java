@@ -53,10 +53,11 @@ public void postMethodName(@RequestBody List<BusRoute> bustransport,@PathVariabl
 }
 
 @PostMapping("Student_Details/{schoolId}")
-public String addingStudentDetails(@RequestBody StudentDetails studentDetails,@PathVariable String schoolId) {
-	String id=studentsDetails.addingStudent(studentDetails,schoolId);
-	return id;
+public String addingStudentDetails(@RequestBody StudentDetails studentDetails, @PathVariable String schoolId) {
+    String id = studentsDetails.addingStudent(studentDetails, schoolId);
+    return id;
 }
+
 
 //@PostMapping("Personal_Details/{sid}")
 //public String addingParentDetails(@RequestBody Map<String, Object> PersonalDetails,@PathVariable String sid) {
@@ -70,11 +71,11 @@ public String addingStudentDetails(@RequestBody StudentDetails studentDetails,@P
 //	return "Fee Details recorded successfully!";
 //}
 
-@PostMapping("attendance/{schoolId}/{sid}")
-public String markAttendance(@RequestBody Map<String, Object> attendanceDetail, @PathVariable String sid, @PathVariable String schoolId) {
-	attendanceDetails.markAttendance(attendanceDetail, sid, schoolId);
-    return "Attendance recorded successfully!";
-}
+//@PostMapping("attendance/{schoolId}/{sid}")
+//public String markAttendance(@RequestBody Map<String, Object> attendanceDetail, @PathVariable String sid, @PathVariable String schoolId) {
+//	attendanceDetails.markAttendance(attendanceDetail, sid, schoolId);
+//    return "Attendance recorded successfully!";
+//}
 
 @PostMapping("day-wise-student-attendance/{schoolId}/{sid}")
 public String markDayWiseAttendance(@RequestBody Map<String, Object> attendanceDetail, @PathVariable String sid,@PathVariable String schoolId) {
@@ -154,9 +155,9 @@ public List<BusRoute> getTransportDetails(
 }
 
 @GetMapping("get_Fee_Details/school/{schoolId}")
-public List<StudentFeeDetails> getFeeDetails(@RequestParam String sid, @PathVariable String schoolId) throws InterruptedException, ExecutionException {
+public List<StudentFeeDetails> getFeeDetails( @PathVariable String schoolId) throws InterruptedException, ExecutionException {
 	System.out.println("#########");
-    return feeDetails.getFeeDetails(sid,schoolId);
+    return feeDetails.getFeeDetails(schoolId);
 }
 
 @GetMapping("get_Fee_Details_by_sid/school/{schoolId}")

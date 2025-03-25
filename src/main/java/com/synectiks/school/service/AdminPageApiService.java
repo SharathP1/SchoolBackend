@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import com.google.cloud.firestore.FirestoreBundle;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.cloud.FirestoreClient;
 import com.synectiks.school.entity.StudentFeeDetails;
 
@@ -44,6 +46,50 @@ public class AdminPageApiService {
             return "Error adding transaction: " + e.getMessage();
         }
     }
+    
+    
+    public void updateFeeDetailsBySid(String sid, String schoolId, List<Map<String, Object>> newFeeDetails) {
+        try {
+            CollectionReference transactionsCollection = db.collection("Fee_Details");
+            Query query = transactionsCollection.whereEqualTo("sid", sid).whereEqualTo("schoolId", schoolId);
+            ApiFuture<QuerySnapshot> querySnapshot = query.get();
+            QuerySnapshot queryResult = querySnapshot.get();
+
+            if (!queryResult.isEmpty()) {
+                QueryDocumentSnapshot document = queryResult.getDocuments().get(0);
+                DocumentReference documentReference = document.getReference();
+
+                Map<String, Object> existingData = document.getData();
+                List<Map<String, Object>> existingFeeDetails = (List<Map<String, Object>>) existingData.get("feedetails");
+
+                // Initialize existingFeeDetails if it is null
+                if (existingFeeDetails == null) {
+                    existingFeeDetails = new ArrayList<>();
+                }
+
+                // Add new fee details to existing fee details
+                for (Map<String, Object> newFeeDetail : newFeeDetails) {
+                    if (!"Paid".equals(newFeeDetail.get("status"))) {
+                        newFeeDetail.remove("paidDate");
+                    }
+                    existingFeeDetails.add(newFeeDetail);
+                }
+
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("feedetails", existingFeeDetails);
+
+                ApiFuture<WriteResult> writeResult = documentReference.update(updates);
+                writeResult.get();
+                System.out.println("Fee details updated successfully.");
+            } else {
+                System.out.println("Document with sid " + sid + " and schoolId " + schoolId + " does not exist.");
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Error updating fee details: " + e.getMessage());
+        }
+    }
+
 
     public List<FeeDetails> getFeeDetailsForCurrentMonth(String schoolId, String sid) throws InterruptedException, ExecutionException {
         LocalDate currentDate = LocalDate.now();
@@ -68,6 +114,8 @@ public class AdminPageApiService {
                 .map(document -> document.toObject(FeeDetails.class))
                 .collect(Collectors.toList());
     }
+    
+    
     
     
     public double getTotalPaymentsReceived(String schoolId) {

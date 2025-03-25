@@ -1,23 +1,23 @@
 package com.synectiks.school.service;
-
+ 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
+ 
 @Service
 public class EmailService {
-
+ 
     private final JavaMailSender mailSender;
-
+ 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
-
+ 
     public void sendCredentialsEmail(String toEmail, String password) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("Your Parent Portal Login Credentials");
-        message.setTo(
+        message.setText(
             "Dear Parent,\n\n" +
             "Your login credentials for the Parent Portal are:\n" +
             "Email: " + toEmail + "\n" +
@@ -25,7 +25,12 @@ public class EmailService {
             "Please log in at https://synefo.synectiks.com \n\n" +
             "Best regards,\nSchool Administration"
         );
-
-        mailSender.send(message);
+ 
+        try {
+            mailSender.send(message);
+        } catch (Exception e) {
+            // Log the exception or handle it as needed
+            System.err.println("Error sending email: " + e.getMessage());
+        }
     }
-}        
+}

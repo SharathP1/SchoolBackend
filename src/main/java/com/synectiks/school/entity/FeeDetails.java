@@ -1,9 +1,11 @@
 package com.synectiks.school.entity;
 
+import java.util.Date;
+
 public class FeeDetails {
 	private String feeType;
-    private double amt;
-    private double amtPaid;
+    private String amt;
+    private String amtPaid;
     private String status;
     private String dueDate;
     private String paidDate;
@@ -13,7 +15,7 @@ public class FeeDetails {
 	}
 
 	// Constructor
-    public FeeDetails(String feeType, double amt, double amtPaid, String status, String dueDate, String paidDate) {
+    public FeeDetails(String feeType, String amt, String amtPaid, String status, String dueDate, String paidDate) {
         this.feeType = feeType;
         this.amt = amt;
         this.amtPaid = amtPaid;
@@ -31,20 +33,20 @@ public class FeeDetails {
         this.feeType = feeType;
     }
 
-    public double getAmt() {
+    public String getAmt() {
         return amt;
     }
 
-    public void setAmt(double amt) {
+    public void setAmt(String amt) {
         this.amt = amt;
     }
 
-    public double getAmtPaid() {
+    public String getAmtPaid() {
         return amtPaid;
     }
 
-    public void setAmtPaid(double amtPaid) {
-        this.amtPaid = amtPaid;
+    public void setAmtPaid(String d) {
+        this.amtPaid = d;
     }
 
     public String getStatus() {
@@ -59,8 +61,8 @@ public class FeeDetails {
         return dueDate;
     }
 
-    public void setDueDate(String dueDate) {
-        this.dueDate = dueDate;
+    public void setDueDate(String string) {
+        this.dueDate = string;
     }
 
     public String getPaidDate() {
@@ -76,7 +78,7 @@ public class FeeDetails {
         return "FeeDetails{" +
                 "feeType='" + feeType + '\'' +
                 ", amt=" + amt +
-                ", amtPaid=" + amtPaid +
+                ", amt_paid=" + amtPaid +
                 ", status='" + status + '\'' +
                 ", dueDate='" + dueDate + '\'' +
                 ", paidDate='" + paidDate + '\'' +

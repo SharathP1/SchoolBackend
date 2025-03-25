@@ -9,7 +9,7 @@ public class StudentFeeDetails {
     private String schoolId;
     private String name;
     private String sid;
-    private List<FeeDetails> feeDetails;
+    private List<FeeDetails> feedetails;
     public StudentFeeDetails() {
 		
 	}
@@ -67,11 +67,11 @@ public class StudentFeeDetails {
     }
 
     public List<FeeDetails> getFeeDetails() {
-        return feeDetails;
+        return feedetails;
     }
 
     public void setFeeDetails(List<FeeDetails> feeDetails) {
-        this.feeDetails = feeDetails;
+        this.feedetails = feeDetails;
     }
 
     @Override
@@ -82,7 +82,8 @@ public class StudentFeeDetails {
                 ", schoolId='" + schoolId + '\'' +
                 ", name='" + name + '\'' +
                 ", sid='" + sid + '\'' +
-                ", feeDetails=" + feeDetails +
+                ", feeDetails=" + feedetails +
                 '}';
     }
 }
+

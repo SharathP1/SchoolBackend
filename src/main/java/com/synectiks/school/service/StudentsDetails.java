@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
 import java.util.HashMap;
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.util.Maps;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
@@ -26,20 +28,35 @@ import com.synectiks.school.entity.StudentDetails;
 @Service
 public class StudentsDetails {
 	
+	
     private final Firestore firestore;
+    private final EmailService emailService;
     
-    public StudentsDetails() {
+    public StudentsDetails(EmailService emailService) {
         this.firestore = FirestoreClient.getFirestore();
+        this.emailService = emailService;
     }
     
   //Pushing Student Details
     public String addingStudent(StudentDetails studentDetails, String schoolId) {
         CollectionReference studentCollection = firestore.collection("Student_Details");
-
+        
+        
+        Pattern emailPattern = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
         // Generate a unique ID for the student document
         String id = UUID.randomUUID().toString();
         studentDetails.setId(id);
         studentDetails.setSchoolId(schoolId);
+
+        // Generate a random password for the student
+        String password = generateRandomPassword();
+        studentDetails.setPassword(password);
+
+        // Validate email
+        String email = studentDetails.getEmail();
+        if (email == null || !emailPattern.matcher(email).matches()) {
+            return "Error: Invalid email format";
+        }
 
         // Convert StudentDetails to a Map for Firestore
         Map<String, Object> studentData = studentDetailsToMap(studentDetails);
@@ -50,39 +67,46 @@ public class StudentsDetails {
         try {
             // Optionally, wait for the write operation to complete
             resultFuture.get();
-           
         } catch (InterruptedException | ExecutionException e) {
-           
             return null;
         }
+
+        // Send credentials email
+        emailService.sendCredentialsEmail(email, password);
 
         return id;
     }
 
-    private Map<String, Object> studentDetailsToMap(StudentDetails studentDetails) {
-        // Convert StudentDetails object to a Map for Firestore
-        return new HashMap<String, Object>() {{
-            put("aadhaarNumber", studentDetails.getAadhaarNumber());
-            put("address", studentDetails.getAddress());
-            put("admissionName", studentDetails.getAdmissionName());
-            put("age", studentDetails.getAge());
-            put("studentClass", studentDetails.getStudentClass());
-            put("dob", studentDetails.getDob());
-            put("email", studentDetails.getEmail());
-            put("fatherName", studentDetails.getFatherName());
-            put("fatherOccupation", studentDetails.getFatherOccupation());
-            put("gender", studentDetails.getGender());
-            put("motherName", studentDetails.getMotherName());
-            put("motherOccupation", studentDetails.getMotherOccupation());
-            put("phoneNumber", studentDetails.getPhoneNumber());
-            put("rollNumber", studentDetails.getRollNumber());
-            put("routeName", studentDetails.getRouteName());
-          
-            put("studentName", studentDetails.getStudentName());
-            put("id", studentDetails.getId());
-            put("schoolId", studentDetails.getSchoolId());
-        }};
+    private String generateRandomPassword() {
+        // Generate a random password (you can customize the length and complexity)
+        return UUID.randomUUID().toString().substring(0, 8);
     }
+
+    private Map<String, Object> studentDetailsToMap(StudentDetails studentDetails) {
+        Map<String, Object> studentData = Maps.newHashMap();
+        studentData.put("id", studentDetails.getId());
+        studentData.put("schoolId", studentDetails.getSchoolId());
+        studentData.put("aadhaarNumber", studentDetails.getAadhaarNumber());
+        studentData.put("address", studentDetails.getAddress());
+        studentData.put("admissionName", studentDetails.getAdmissionName());
+        studentData.put("age", studentDetails.getAge());
+        studentData.put("studentClass", studentDetails.getStudentClass());
+        studentData.put("dob", studentDetails.getDob());
+        studentData.put("email", studentDetails.getEmail());
+        studentData.put("fatherName", studentDetails.getFatherName());
+        studentData.put("fatherOccupation", studentDetails.getFatherOccupation());
+        studentData.put("gender", studentDetails.getGender());
+        studentData.put("motherName", studentDetails.getMotherName());
+        studentData.put("motherOccupation", studentDetails.getMotherOccupation());
+        studentData.put("phoneNumber", studentDetails.getPhoneNumber());
+        studentData.put("rollNumber", studentDetails.getRollNumber());
+        studentData.put("routeName", studentDetails.getRouteName());
+        studentData.put("studentName", studentDetails.getStudentName());
+        studentData.put("password", studentDetails.getPassword()); // Include the password
+
+        return studentData;
+    }
+
   //Getting Complete Students Details
   	public List<StudentDetails> getstudentdetails(String schoolId) throws InterruptedException, ExecutionException {
   	
