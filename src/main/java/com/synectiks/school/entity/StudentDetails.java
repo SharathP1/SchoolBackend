@@ -224,4 +224,9 @@ public class StudentDetails {
                 + phoneNumber + ", rollNumber=" + rollNumber + ", routeName=" + routeName
                 + ", studentName=" + studentName + ", schoolId=" + schoolId + ", id=" + id + "]";
     }
+
+	public String getSection() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

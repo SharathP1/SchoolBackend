@@ -29,4 +29,9 @@ public class AttendanceRecord {
     public void setPresent(boolean present) {
         this.present = present;
     }
+
+	public Object getDate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

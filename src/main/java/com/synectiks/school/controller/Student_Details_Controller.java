@@ -45,17 +45,19 @@ public class Student_Details_Controller {
 	
 	
 	//POST Methods
-@PostMapping("transport_details/{schoolId}")
+@PostMapping("/transport_details/{schoolId}")
 public void postMethodName(@RequestBody List<BusRoute> bustransport,@PathVariable String schoolId) {
     //TODO: process POST request
 	transportServiceDetails.addingTransportDetails(bustransport,schoolId);
   
 }
 
-@PostMapping("Student_Details/{schoolId}")
-public String addingStudentDetails(@RequestBody StudentDetails studentDetails, @PathVariable String schoolId) {
-    String id = studentsDetails.addingStudent(studentDetails, schoolId);
-    return id;
+@PostMapping("Student_Details/{schoolId}/{uid}")
+public String addingStudentDetails(@RequestBody StudentDetails studentDetails,
+    @PathVariable String schoolId,
+    @PathVariable String uid) {
+    String result = studentsDetails.addingStudent(studentDetails, schoolId, uid);
+    return result;
 }
 
 
@@ -102,9 +104,9 @@ public List<StudentDetails> getMethodName(@PathVariable String schoolId) throws 
 }
 
 
-@GetMapping("get_Student_Details_by_id/schoolId/{schoolId}/StudentrollNumber/{rollNumber}")
-public Map<String, Object> getStudentById(@PathVariable String schoolId,@PathVariable String rollNumber) throws ExecutionException, InterruptedException {
-    return studentsDetails.getStudentById(schoolId,rollNumber);
+@GetMapping("get_Student_Details_by_id/schoolId/{schoolId}/id/{id}")
+public Map<String, Object> getStudentById(@PathVariable String schoolId,@PathVariable String id) throws ExecutionException, InterruptedException {
+    return studentsDetails.getStudentById(schoolId,id);
 }
 //
 //@GetMapping("get_Student_Details/{id}/transport")

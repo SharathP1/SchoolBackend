@@ -19,13 +19,22 @@ public class HODController {
     private HODService hodDetailsService;
 
     // Add a new HOD
-    @PostMapping("/{schoolId}/addHod")
-    public String addHod(@PathVariable String schoolId, @RequestBody Map<String, Object> requestBody) {
-        String department = (String) requestBody.get("department");
-        Map<String, Object> hodDetails = (Map<String, Object>) requestBody.get("hodDetails");
-        hodDetailsService.addHod(hodDetails, department, schoolId);
-        return "HOD added successfully!";
+    @PostMapping("/{schoolId}/{uid}/addHod")
+    public ResponseEntity<String> addHod(@PathVariable String schoolId,
+                                         @PathVariable String uid,
+                                         @RequestBody Map<String, Object> requestBody) {
+        try {
+            String Department = (String) requestBody.get("Department");
+            Map<String, Object> hodDetails = (Map<String, Object>) requestBody.get("hodDetails");
+
+            // Call the modified addHod method with the uid
+            hodDetailsService.addHod(hodDetails, Department, schoolId, uid);
+            return ResponseEntity.ok("HOD added successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error adding HOD: " + e.getMessage());
+        }
     }
+
 
     // Get all HODs for a school
     @GetMapping("/{schoolId}/getAllHodDetails")

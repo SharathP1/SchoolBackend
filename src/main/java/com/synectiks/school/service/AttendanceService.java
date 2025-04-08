@@ -97,6 +97,8 @@ public class AttendanceService {
         }
         return "Attendance saved successfully.";
     }
+    
+    
 
 
     public String storeDayAttendanceDetails(List<StudentAttendance> attendanceList) {
@@ -238,6 +240,26 @@ public class AttendanceService {
 
             // Create a query against the collection
             ApiFuture<QuerySnapshot> querySnapshot = attendanceCollection.whereEqualTo("schoolId", schoolId).get();
+
+            // Process the query results
+            for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {
+                Map<String, Object> studentData = document.getData();
+                results.add(studentData);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+         
+        }
+        return results;
+    }
+    
+    public List<Map<String, Object>> getAllDayCLassAttendanceData(String schoolId, String clas) {
+        List<Map<String, Object>> results = new ArrayList<>();
+        try {
+            // Get the collection reference
+            CollectionReference attendanceCollection = firestore.collection("Day-Wise-Attendance");
+
+            // Create a query against the collection
+            ApiFuture<QuerySnapshot> querySnapshot = attendanceCollection.whereEqualTo("schoolId", schoolId).whereEqualTo("class", clas).get();
 
             // Process the query results
             for (QueryDocumentSnapshot document : querySnapshot.get().getDocuments()) {

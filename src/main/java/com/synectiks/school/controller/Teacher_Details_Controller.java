@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,33 +22,50 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.service.annotation.DeleteExchange;
 
+import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.firebase.cloud.FirestoreClient;
+import com.synectiks.school.service.TeacherAttendanceDetails;
 import com.synectiks.school.service.TeacherDetails;
 
 @RestController
 @CrossOrigin
 public class Teacher_Details_Controller {
+	
+	
 
     @Autowired
     private TeacherDetails teacherDetailsService;
+	private Firestore firestore;
+    
     
     
 
  // Endpoint to add a new teacher
-    @PostMapping("/{schoolId}/{hodId}/addTeacher")
+    @PostMapping("/{schoolId}/{hodId}/{uid}/addTeacher")
     public ResponseEntity<String> addTeacher(@PathVariable String schoolId,
-                                          @PathVariable String hodId,
-                                          @RequestBody Map<String, Object> requestBody) {
+                                             @PathVariable String hodId,
+                                             @PathVariable String uid,
+                                             @RequestBody Map<String, Object> requestBody) {
         try {
             String className = (String) requestBody.get("className");
             Map<String, Object> teacherDetails = (Map<String, Object>) requestBody.get("teacherDetails");
-            teacherDetailsService.addTeacher(teacherDetails, className, schoolId, hodId);
-            return ResponseEntity.ok("Teacher details added successfully!");
+
+            // Call the modified addTeacher method with the uid
+            String teacherId = teacherDetailsService.addTeacher(teacherDetails, className, schoolId, hodId, uid);
+            return ResponseEntity.ok("Teacher details added successfully! Teacher ID: " + teacherId);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error adding teacher: " + e.getMessage());
         }
     }
+
+
 
 
     // Endpoint to add periods for a teacher based on employee name and class
@@ -67,6 +88,76 @@ public class Teacher_Details_Controller {
 //        teacherDetailsService.addTimetableForClass(employeeId, className, timetable);
 //        return "Timetable added successfully!";
 //    }
+    
+    @PostMapping("/teacher-attendance/{schoolId}/{teacherId}/{hodId}")
+    public ResponseEntity<String> storeTeacherAttendanceDetails(
+        @PathVariable String schoolId,
+        @PathVariable String teacherId,
+        @PathVariable String hodId,
+        @RequestBody List<TeacherAttendanceDetails> teacherAttendanceDetailsList) {
+
+        // Set the schoolId, teacherId, and hodId in each teacherAttendanceDetails object
+        for (TeacherAttendanceDetails teacherAttendanceDetails : teacherAttendanceDetailsList) {
+            teacherAttendanceDetails.setSchoolId(schoolId);
+            teacherAttendanceDetails.setTid(teacherId);
+            teacherAttendanceDetails.setHodId(hodId);
+        }
+
+        String result = teacherDetailsService.storeTeacherAttendanceDetails(teacherAttendanceDetailsList);
+        return ResponseEntity.ok(result);
+    }
+    
+    @PostMapping("/day-wise-teacher-attendance/{schoolId}/{teacherId}/{hodId}")
+    public ResponseEntity<String> storeDayWiseTeacherAttendanceDetails(
+        @PathVariable String schoolId,
+        @PathVariable String teacherId,
+        @PathVariable String hodId,
+        @RequestBody List<TeacherAttendanceDetails> teacherAttendanceDetailsList) {
+
+        // Set the schoolId, teacherId, and hodId in each teacherAttendanceDetails object
+        for (TeacherAttendanceDetails teacherAttendanceDetails : teacherAttendanceDetailsList) {
+            teacherAttendanceDetails.setSchoolId(schoolId);
+            teacherAttendanceDetails.setTid(teacherId);
+            teacherAttendanceDetails.setHodId(hodId);
+        }
+
+        String result = teacherDetailsService.storeDayWiseTeacherAttendanceDetails(teacherAttendanceDetailsList);
+        return ResponseEntity.ok(result);
+    }
+    
+    @GetMapping("/teacher-attendance/{schoolId}/{teacherId}/{hodId}")
+    public ResponseEntity<Map<String, Object>> getTeacherAttendanceDetails(
+        @PathVariable String schoolId,
+        @PathVariable String teacherId,
+        @PathVariable String hodId) {
+
+        Map<String, Object> attendanceDetails = teacherDetailsService.getTeacherAttendanceDetails(schoolId, teacherId, hodId);
+        return ResponseEntity.ok(attendanceDetails);
+    }
+    
+    @GetMapping("/day-wise-teacher-attendance/{schoolId}/{hodId}/{date}")
+    public ResponseEntity<List<Map<String, Object>>> getDayWiseTeacherAttendanceDetails(
+        @PathVariable String schoolId,
+        @PathVariable String hodId,
+        @PathVariable String date) {
+
+        List<Map<String, Object>> attendanceDetails = teacherDetailsService.getDayWiseTeacherAttendanceDetails(schoolId, hodId, date);
+        return ResponseEntity.ok(attendanceDetails);
+    }
+
+    
+    @GetMapping("/all-hod-teacher-attendance/{schoolId}/{hodId}")
+    public ResponseEntity<List<Map<String, Object>>> getTeacherAttendanceDetails(
+        @PathVariable String schoolId,
+        @PathVariable String hodId) {
+
+        List<Map<String, Object>> attendanceDetails = teacherDetailsService.getTeacherHODAttendanceDetails(schoolId, hodId);
+        return ResponseEntity.ok(attendanceDetails);
+    }
+
+
+
+
     
     @PostMapping("/{schoolId}/addTeacherTimetable")
     public ResponseEntity<String> addTeacherTimetable(@PathVariable String schoolId, @RequestBody Map<String, Object> timetableData) {
@@ -124,18 +215,49 @@ public class Teacher_Details_Controller {
     }
 
 
-    
     @PostMapping("/addLessonPlan/{teacherId}/{schoolId}/{hodId}")
-    public String addLessonPlan(
+    public ResponseEntity<String> addLessonPlan(
             @PathVariable String teacherId,
             @PathVariable String schoolId,
             @PathVariable String hodId,
-            @RequestBody Map<String, Object> lessonPlan) 
-            throws InterruptedException, ExecutionException {
-        
-        teacherDetailsService.addLessonPlan(teacherId, schoolId, hodId, lessonPlan);
-        return "Lesson plan added successfully!";
+            @RequestBody Map<String, Object> lessonPlan) {
+
+        try {
+            teacherDetailsService.addLessonPlan(teacherId, schoolId, hodId, lessonPlan);
+            return ResponseEntity.ok("Lesson plan added successfully!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Restore interrupted status
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add lesson plan: " + e.getMessage());
+        } catch (ExecutionException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add lesson plan: " + e.getMessage());
+        }
     }
+    
+    
+    @PostMapping("/upload/teacher/{teacherId}/class/{classNumber}/school/{schoolId}")
+    public ResponseEntity<Map<String, Object>> uploadDocument(
+            @PathVariable String teacherId,
+            @PathVariable String classNumber,
+            @PathVariable String schoolId,
+            @RequestBody DocumentUploadRequest request) {
+        try {
+            Map<String, Object> document = teacherDetailsService.uploadDocument(
+                    teacherId,
+                    classNumber,
+                    request.getFileContent(),
+                    request.getFileName(),
+                    request.getFileType(),
+                    schoolId
+            );
+            return ResponseEntity.ok(document);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
+
 
 
 
@@ -198,6 +320,16 @@ public class Teacher_Details_Controller {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    
+    @GetMapping("/getallteachertimetables/{schoolId}")
+    public ResponseEntity<List<Map<String, Object>>> getAllTeacherTimetables(@PathVariable String schoolId) {
+        try {
+            List<Map<String, Object>> timetables = teacherDetailsService.getAllTeacherTimetables(schoolId);
+            return ResponseEntity.ok(timetables);
+        } catch (InterruptedException | ExecutionException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
     
     @GetMapping("/getclasstimetable/{className}/{schoolId}")
@@ -224,9 +356,11 @@ public class Teacher_Details_Controller {
 
     
     @GetMapping("/getLessonPlan/{id}/{schoolId}")
-    public List<Map<String, Object>> getLessonPlan(@PathVariable String id, @PathVariable String schoolId) throws InterruptedException, ExecutionException {
+    public List<Map<String, Object>> getLessonPlan(@PathVariable String id, @PathVariable String schoolId) 
+            throws InterruptedException, ExecutionException {
         return teacherDetailsService.getLessonPlan(id, schoolId);
     }
+
 
 
     
@@ -269,6 +403,19 @@ public class Teacher_Details_Controller {
                                  .body(Collections.singletonMap("error", e.getMessage()));
         }
     }
+    
+    
+    @GetMapping("/homework/class/{classNumber}/school/{schoolId}")
+    public ResponseEntity<List<Map<String, Object>>> getHomework(
+            @PathVariable String classNumber,
+            @PathVariable String schoolId) {
+        try {
+            List<Map<String, Object>> homeworkList = teacherDetailsService.getHomework(classNumber, schoolId);
+            return ResponseEntity.ok(homeworkList);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.singletonList(Collections.singletonMap("error", e.getMessage())));
+        }
+    }
 
 
 
@@ -283,33 +430,53 @@ public class Teacher_Details_Controller {
     public ResponseEntity<Map<String, Object>> updateLessonPlan(
             @PathVariable String hodId,
             @PathVariable String teacherId,
-            @PathVariable String id, 
-            @PathVariable String schoolId, 
-            @RequestBody Map<String, Object> lessonPlan) 
-            throws InterruptedException, ExecutionException {
-        
-        // Create a response map
-        Map<String, Object> response = new HashMap<>();
-        
-        // Add status as pending and IDs to the lessonPlan
+            @PathVariable String id,
+            @PathVariable String schoolId,
+            @RequestBody Map<String, Object> lessonPlan) throws InterruptedException, ExecutionException, IOException {
+
         lessonPlan.put("status", "pending");
         lessonPlan.put("hodId", hodId);
         lessonPlan.put("teacherId", teacherId);
-        
-        // Update the lesson plan and get the result
-        Map<String, Object> updatedResult = teacherDetailsService.updateLessonPlan(id, schoolId, lessonPlan);
-        
-        // Prepare the response
+
+        // Call the service method with the required parameters
+        teacherDetailsService.updateLessonPlan(id, teacherId, schoolId, hodId, lessonPlan);
+        this.firestore = FirestoreClient.getFirestore();
+
+        // Fetch the updated lesson plan to get the updateTime
+        DocumentReference lessonPlanDocument = firestore.collection("LessonPlans").document(id);
+        ApiFuture<DocumentSnapshot> future = lessonPlanDocument.get();
+        DocumentSnapshot document = future.get();
+
+        if (!document.exists()) {
+            throw new IllegalArgumentException("Lesson plan with the provided ID does not exist.");
+        }
+
+        Map<String, Object> updatedResult = document.getData();
+
+        // Format updateTime in yyyy-MM-dd hh:mm a format
+        String formattedTime = null;
+        Object updateTime = updatedResult.get("updatedAt");
+
+        if (updateTime instanceof Timestamp) {
+            LocalDateTime localDateTime = ((Timestamp) updateTime).toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a");
+            formattedTime = localDateTime.format(formatter);
+        } else if (updateTime != null) {
+            formattedTime = updateTime.toString(); // fallback
+        }
+
+        Map<String, Object> response = new HashMap<>();
         response.put("status", "pending");
         response.put("hodId", hodId);
         response.put("teacherId", teacherId);
-        response.put("lessonPlan", updatedResult.get("lessonPlan"));
-        response.put("updateTime", updatedResult.get("updateTime"));
+        response.put("topicName", updatedResult.get("topicName"));
+        response.put("className", updatedResult.get("className"));
+        response.put("id", id);
+        response.put("updateTime", formattedTime);
         response.put("message", "Lesson plan updated successfully!");
-        
+
         return ResponseEntity.ok(response);
     }
-
 
     
 //    Delete Apis
@@ -317,17 +484,18 @@ public class Teacher_Details_Controller {
     public ResponseEntity<Map<String, String>> deleteLessonPlan(@PathVariable String lessonPlanId, @PathVariable String schoolId) {
         try {
             teacherDetailsService.deleteLessonPlan(lessonPlanId, schoolId);
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Lesson plan deleted successfully!");
-            return ResponseEntity.ok(response);
-        } catch (ExecutionException | InterruptedException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("status", "error");
-            response.put("message", "Failed to delete lesson plan.");
-            return ResponseEntity.status(500).body(response);
+            return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "message", "Lesson plan deleted successfully!"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "status", "error",
+                "message", "Failed to delete lesson plan."
+            ));
         }
     }
+
 
 
 

@@ -13,7 +13,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
  
-    public void sendCredentialsEmail(String toEmail, String password) {
+    public void sendCredentialsEmail(String toEmail, String password, String sid) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("Your Parent Portal Login Credentials");
@@ -33,4 +33,14 @@ public class EmailService {
             System.err.println("Error sending email: " + e.getMessage());
         }
     }
+
+	public void sendCredentialsEmail(String email, String password, String sid, String schoolId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void sendCredentialsEmail(String email, String password) {
+		// TODO Auto-generated method stub
+		
+	}
 }

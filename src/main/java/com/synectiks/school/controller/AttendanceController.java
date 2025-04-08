@@ -85,6 +85,11 @@ public class AttendanceController {
 	        return attendanceService.getAllDayAttendanceData(schoolId);
 	    }
 	 
+	 @GetMapping("/allDayCLassStudentsAttendance/{schoolId}/{clas}")
+	    public List<Map<String, Object>> getAllCLassAttendanceData1(@PathVariable String schoolId, @PathVariable String clas) {
+	        return attendanceService.getAllDayCLassAttendanceData(schoolId, clas);
+	    }
+	 
 
 	    @GetMapping("/oneStudentAttendance/{schoolId}/{sid}")
 	    public List<Map<String, Object>> getAttendanceData(

@@ -15,32 +15,32 @@
 //
 //public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 //
-////	protected void doFilterInternal1(
-////	    jakarta.servlet.http.HttpServletRequest request,
-////	    jakarta.servlet.http.HttpServletResponse response,
-////	    jakarta.servlet.FilterChain filterChain
-////	) throws jakarta.servlet.ServletException, IOException {
-////        String token = request.getHeader("Authorization");
-////        System.out.println("************");
-////        if (token != null && token.startsWith("Bearer ")) {
-////            token = token.substring(7);
-////            try {
-////                FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
-////                System.out.println("token"+token);
-////                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-////                    decodedToken.getUid(),
-////                    null,
-////                    null
-////                );
-////                SecurityContextHolder.getContext().setAuthentication(auth);
-////            } catch (FirebaseAuthException e) {
-////                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-////                return;
-////            }
-////        }
-////
-////        filterChain.doFilter(request, response);
-////    }
+//	protected void doFilterInternal1(
+//	    jakarta.servlet.http.HttpServletRequest request,
+//	    jakarta.servlet.http.HttpServletResponse response,
+//	    jakarta.servlet.FilterChain filterChain
+//	) throws jakarta.servlet.ServletException, IOException {
+//        String token = request.getHeader("Authorization");
+//        System.out.println("************");
+//        if (token != null && token.startsWith("Bearer ")) {
+//            token = token.substring(7);
+//            try {
+//                FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
+//                System.out.println("token"+token);
+//                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+//                    decodedToken.getUid(),
+//                    null,
+//                    null
+//                );
+//                SecurityContextHolder.getContext().setAuthentication(auth);
+//            } catch (FirebaseAuthException e) {
+//                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//                return;
+//            }
+//        }
+//
+//        filterChain.doFilter(request, response);
+//    }
 //
 //	@Override
 //	protected void doFilterInternal(

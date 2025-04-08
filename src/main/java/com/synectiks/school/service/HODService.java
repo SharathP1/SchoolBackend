@@ -20,20 +20,56 @@ public class HODService {
     }
 
     // Add HOD details
-    public void addHod(Map<String, Object> hodDetails, String department, String schoolId) {
+    public void addHod(Map<String, Object> hodDetails, String Department, String schoolId, String uid) throws Exception {
         if (hodDetails == null) {
             throw new IllegalArgumentException("HOD details cannot be null");
         }
-        CollectionReference hodCollection = firestore.collection("Hod_Details");
 
-        String id = UUID.randomUUID().toString();
-        hodDetails.put("id", id);
-        hodDetails.put("department", department);
+        CollectionReference hodCollection = firestore.collection("Hod_Details");
+        CollectionReference schoolsCollection = firestore.collection("schools");
+
+        // Reference to users subcollection under the specific school
+        DocumentReference userDoc = schoolsCollection
+            .document(schoolId)
+            .collection("users")
+            .document(uid);
+
+        // Fetch user data from Firestore
+        ApiFuture<DocumentSnapshot> userFuture = userDoc.get();
+        DocumentSnapshot userSnapshot = userFuture.get();
+
+        if (!userSnapshot.exists()) {
+            throw new IllegalArgumentException("User with UID " + uid + " not found in school " + schoolId);
+        }
+
+        // Extract hodId from the user document
+        String hodId = userSnapshot.getString("hodId");
+        if (hodId == null) {
+            throw new IllegalArgumentException("No hodId found in user document with UID " + uid);
+        }
+
+        // Extract relevant fields from the user document
+        Map<String, Object> userData = userSnapshot.getData();
+        if (userData != null) {
+            // Add user data to hodDetails (only if not already set)
+            if (!hodDetails.containsKey("email") && userData.containsKey("email")) {
+                hodDetails.put("email", userData.get("email"));
+            }
+            if (!hodDetails.containsKey("name") && userData.containsKey("name")) {
+                hodDetails.put("name", userData.get("name"));
+            }
+            // Add more fields as needed based on your users collection structure
+        }
+
+        // Add extracted hodId and other reference fields to hod details
+        hodDetails.put("id", hodId);
+        hodDetails.put("Department", Department);
         hodDetails.put("schoolId", schoolId);
 
-        DocumentReference hodDocument = hodCollection.document(id);
+        DocumentReference hodDocument = hodCollection.document(hodId);
         ApiFuture<WriteResult> insertingDataInDocument = hodDocument.set(hodDetails);
     }
+
 
     // Get all HODs for a school
     public List<Map<String, Object>> getAllHodDetails(String schoolId) throws InterruptedException, ExecutionException {
